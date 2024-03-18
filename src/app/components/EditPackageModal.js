@@ -11,6 +11,12 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         name: packageData.name,
         description: packageData.description,
         status: packageData.status,
+        customerId: packageData.customerId,
+        trackingNumber: packageData.trackingNumber,
+        packageWeight: packageData.packageWeight,
+        packageDimensions: packageData.packageDimensions,
+        shipDate: packageData.shipDate,
+        deliveryDate: packageData.deliveryDate,
       });
     }
   }, [packageData, form]);
@@ -70,6 +76,7 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
             <Select.Option value="Delivered">Delivered</Select.Option>
           </Select>
         </Form.Item>
+        {/* add form fields for remaining package value */}
       </Form>
     </Modal>
   );

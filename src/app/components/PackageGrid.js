@@ -21,6 +21,26 @@ const PackagesGrid = () => {
     { headerName: "Package Name", field: "name", flex: 1 },
     { headerName: "Description", field: "description", flex: 1 },
     { headerName: "Status", field: "status", flex: 1},
+    { headerName: "Customer Id", field: "customerId", flex: 1},
+    { headerName: "Tracking Number", field: "trackingNumber", flex: 1},
+    { headerName: "Package Weight (lbs)", field: "packageWeight", flex: 1},
+    { headerName: "Package Dimensions (ft)", field: "packageDimensions", flex: 1},
+    {
+      headerName: "Ship Date", 
+      field: "shipDate",
+      cellRenderer: (params) => {
+        const date = params.value?.toDate ? params.value.toDate() : null;
+        return date ? date.toLocaleDateString() : '';
+      },
+      flex: 1
+    },
+    
+    { headerName: "Delivery Date", field: "deliveryDate",
+    cellRenderer: (params) => {
+      const date = params.value?.toDate ? params.value.toDate() : null;
+      return date ? date.toLocaleDateString() : '';
+    },
+    flex: 1},
     // add other fields
     {
       headerName: "Actions",
@@ -77,7 +97,7 @@ const PackagesGrid = () => {
 
   useEffect(() => {
     fetchPackages();
-  }, [isModalOpen, currentPackage]);
+  }, []);
 
   const fetchPackages = async () => {
     const querySnapshot = await getDocs(collection(db, "packages"));
@@ -97,11 +117,11 @@ const PackagesGrid = () => {
           </Button>
         </Col>
       </Row>
-      <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
+      <div className="ag-theme-alpine" style={{ width: '100%' }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columns}
-          //domLayout='autoHeight'
+          domLayout='autoHeight'
         />
       </div>
       {isModalOpen && currentPackage && (
