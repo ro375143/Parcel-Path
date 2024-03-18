@@ -7,8 +7,10 @@ import { db } from '../firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import EditPackageModal from './EditPackageModal';
 import ButtonRenderer from './ButtonRenderer';
-import { Button, Input, Row, Col } from 'antd';
+import { Button, Input, Row, Col, Modal } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import moment from 'moment';
+import { Timestamp } from 'firebase/firestore';
 
 
 const PackagesGrid = () => {
@@ -23,24 +25,27 @@ const PackagesGrid = () => {
     { headerName: "Status", field: "status", flex: 1},
     { headerName: "Customer Id", field: "customerId", flex: 1},
     { headerName: "Tracking Number", field: "trackingNumber", flex: 1},
-    { headerName: "Package Weight (lbs)", field: "packageWeight", flex: 1},
-    { headerName: "Package Dimensions (ft)", field: "packageDimensions", flex: 1},
+    { headerName: "Package Weight", field: "packageWeight", flex: 1},
+    { headerName: "Package Dimensions", field: "packageDimensions", flex: 1},
     {
       headerName: "Ship Date", 
       field: "shipDate",
       cellRenderer: (params) => {
         const date = params.value?.toDate ? params.value.toDate() : null;
-        return date ? date.toLocaleDateString() : '';
+        return date ? moment(date).format("MM-DD-YYYY") : ''; // using moment for formatting
+      },
+      flex: 1
+    },
+    {
+      headerName: "Delivery Date", 
+      field: "deliveryDate",
+      cellRenderer: (params) => {
+        const date = params.value?.toDate ? params.value.toDate() : null;
+        return date ? moment(date).format("MM-DD-YYYY") : '';
       },
       flex: 1
     },
     
-    { headerName: "Delivery Date", field: "deliveryDate",
-    cellRenderer: (params) => {
-      const date = params.value?.toDate ? params.value.toDate() : null;
-      return date ? date.toLocaleDateString() : '';
-    },
-    flex: 1},
     // add other fields
     {
       headerName: "Actions",
@@ -63,21 +68,27 @@ const PackagesGrid = () => {
   };
 
   const deletePackage = async (id) => {
-    if (confirm('Are you sure you want to delete this package?')) {
-      await deletePackageFromFirestore(id);
-    }
+    Modal.confirm({
+      title: 'Are you sure delete this package?',
+      content: 'This action cannot be undone',
+      okText: 'Yes, delete it',
+      okType: 'danger',
+      cancelText: 'No, cancel',
+      onOk: async () => {
+        await deletePackageFromFirestore(id);
+      },
+      onCancel() {
+        console.log('Cancel delete');
+      },
+    });
   };
-
-  const updatePackageInFirestore = async (id, newData) => {
-    const packageRef = doc(db, "packages", id);
-    await updateDoc(packageRef, newData);
-    refreshData();
-  };
+  
 
   const deletePackageFromFirestore = async (id) => {
     await deleteDoc(doc(db, "packages", id));
-    refreshData();
+    fetchPackages();
   };
+  
   
   const openEditModal = (packageData) => {
     setCurrentPackage(packageData);
@@ -90,10 +101,24 @@ const PackagesGrid = () => {
   };
 
   const savePackage = async (id, updatedData) => {
+    const dataWithFirestoreTimestamp = {
+      ...updatedData,
+      // Convert Moment.js dates to Firestore Timestamps
+      shipDate: updatedData.shipDate ? Timestamp.fromDate(new Date(updatedData.shipDate)) : null,
+      deliveryDate: updatedData.deliveryDate ? Timestamp.fromDate(new Date(updatedData.deliveryDate)) : null,
+      // Add other fields conversion if necessary
+    };
+  
     const packageRef = doc(db, "packages", id);
-    await updateDoc(packageRef, updatedData);
-    fetchPackages();
+    try {
+      await updateDoc(packageRef, dataWithFirestoreTimestamp);
+      console.log("Package updated successfully");
+      fetchPackages();
+    } catch (error) {
+      console.error("Error updating package:", error);
+    }
   };
+  
 
   useEffect(() => {
     fetchPackages();
