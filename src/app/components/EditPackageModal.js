@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select } from 'antd';
+import { Modal, Form, Input, Select, DatePicker, InputNumber } from 'antd';
+import moment from 'moment';
 
 const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
   const [form] = Form.useForm();
@@ -13,10 +14,10 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         status: packageData.status,
         customerId: packageData.customerId,
         trackingNumber: packageData.trackingNumber,
-        packageWeight: packageData.packageWeight,
-        packageDimensions: packageData.packageDimensions,
-        shipDate: packageData.shipDate,
-        deliveryDate: packageData.deliveryDate,
+        packageWeight: packageData.packageWeight ? packageData.packageWeight : 0,
+        packageDimensions: packageData.packageDimensions ? packageData.packageDimensions : '',
+        shipDate: packageData.shipDate ? moment(packageData.shipDate.toDate()) : null,
+        deliveryDate: packageData.deliveryDate ? moment(packageData.deliveryDate.toDate()) : null,
       });
     }
   }, [packageData, form]);
@@ -76,7 +77,48 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
             <Select.Option value="Delivered">Delivered</Select.Option>
           </Select>
         </Form.Item>
-        {/* add form fields for remaining package value */}
+        <Form.Item
+        name="customerId"
+        label="Customer ID"
+        rules={[{ required: true, message: 'Please input the customer ID!' }]}
+        >
+        <Input />
+        </Form.Item>
+        <Form.Item
+        name="trackingNumber"
+        label="Tracking Number"
+        rules={[{ required: false }]}
+        >
+        <Input disabled />
+        </Form.Item>
+        <Form.Item
+        name="packageWeight"
+        label="Package Weight"
+        rules={[{ required: true, message: 'Please input the package weight!' }]}
+        >
+        <InputNumber min={0} step={0.01} style={{ width: '100%' }} suffix="lbs" />
+        </Form.Item>
+        <Form.Item
+        name="packageDimensions"
+        label="Package Dimensions"
+        rules={[{ required: true, message: 'Please input the package dimensions!' }]}
+        >
+        <Input placeholder="L x W x H" />
+        </Form.Item>
+        <Form.Item
+        name="shipDate"
+        label="Ship Date"
+        rules={[{ required: false }]}
+        >
+        <DatePicker disabled format="YYYY-MM-DD" />
+        </Form.Item>
+        <Form.Item
+        name="deliveryDate"
+        label="Delivery Date"
+        rules={[{ required: false }]}
+        >
+        <DatePicker format="YYYY-MM-DD" />
+        </Form.Item>
       </Form>
     </Modal>
   );
