@@ -1,10 +1,13 @@
-import FirebaseCrud from "./components/FirebaseCrud/FirebaseCrud";
-import styles from "./page.module.css";
+import React from 'react';
+import PackagesGrid from '../app/components/PackageGrid';
 
-export default function Home() {
+const HomePage = () => {
   return (
-    <main className={styles.main}>
-      <FirebaseCrud />
-    </main>
+    <div>
+      <h1>Packages</h1>
+      <PackagesGrid />
+    </div>
   );
 }
+
+export default HomePage;
