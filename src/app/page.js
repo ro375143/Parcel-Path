@@ -1,11 +1,9 @@
 import React from 'react';
-import PackagesGrid from '../app/components/PackageGrid';
 
 const HomePage = () => {
   return (
     <div>
-      <h1>Packages</h1>
-      <PackagesGrid />
+      <h1>HomePage or Landing Page</h1>
     </div>
   );
 }

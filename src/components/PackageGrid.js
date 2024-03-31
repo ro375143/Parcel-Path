@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { db } from '../firebase';
+import { db } from '../firebase/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import EditPackageModal from './EditPackageModal';
 import ButtonRenderer from './ButtonRenderer';
