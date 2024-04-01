@@ -1,0 +1,29 @@
+/* components/Footer.module.css */
+.footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .footerContent {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  
+  .links, .socialMedia {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .links a, .socialMedia a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 10px;
+  }
+  
+  .copyRight {
+    font-size: 0.8rem;
+  }
+  

@@ -1,32 +1,52 @@
-// components/Navbar.js
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Menu } from 'antd';
-import {
-  HomeOutlined,
-  UserOutlined,
-  UploadOutlined,
-} from '@ant-design/icons';
+import { MenuOutlined } from '@ant-design/icons';
+import styles from './Navbar.module.css';
 
-const Navbar = () => {
+const navLinks = [
+  { name: 'Shipping', path: '/shipping' },
+  { name: 'Tracking', path: '/tracking' },
+  { name: 'Support', path: '/support' },
+];
+
+const authLinks = [
+  { name: 'Account', path: '/account' },
+  { name: 'Logout', path: '/logout' },
+];
+
+const guestLinks = [
+  { name: 'Login', path: '/login' },
+  { name: 'Register', path: '/register' },
+];
+
+const Navbar = ({ isLoggedIn }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+  // function to dynamically render links based on isLoggedIn
+  const renderLinks = (links) => links.map((link, index) => (
+    <li key={index}>
+      <Link href={link.path}>{link.name}</Link>
+    </li>
+  ));
+
   return (
-    <Menu mode="horizontal">
-      <Menu.Item key="home" icon={<HomeOutlined />}>
-        <Link href="/">
-          <a>Home</a>
-        </Link>
-      </Menu.Item>
-      <Menu.Item key="users" icon={<UserOutlined />}>
-        <Link href="/users">
-          <a>Users</a>
-        </Link>
-      </Menu.Item>
-      <Menu.Item key="uploads" icon={<UploadOutlined />}>
-        <Link href="/uploads">
-          <a>Uploads</a>
-        </Link>
-      </Menu.Item>
-    </Menu>
+    <nav className={styles.navbar}>
+      <div className={styles.logoContainer}>
+        <Link href="/" className={styles.logoLink}>ParcelPath Logo</Link>
+      </div>
+      
+      <div className={styles.navLinksContainer}>
+        <ul className={isMobileMenuOpen ? styles.navLinksActive : styles.navLinks}>
+          {renderLinks(navLinks)}
+          {isLoggedIn ? renderLinks(authLinks) : renderLinks(guestLinks)}
+        </ul>
+        <button onClick={toggleMobileMenu} className={styles.mobileMenuButton}>
+          <MenuOutlined />
+        </button>
+      </div>
+    </nav>
   );
 };
 
