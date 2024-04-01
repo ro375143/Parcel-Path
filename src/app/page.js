@@ -1,7 +1,12 @@
+'use client'
 import React from 'react';
 import './page.module.css';
+import { useRouter } from 'next/navigation';
 
 const HomePage = () => {
+  const router = useRouter();
+  router.push('/login');
+  
   return (
     <>
       <div className='homepage-background'>

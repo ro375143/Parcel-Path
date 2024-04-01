@@ -2,24 +2,32 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '../../firebase/firebase';
+import { auth, db } from '../../../firebase/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
 export default function adminSignup() {
   const router = useRouter();
   const [firstName, setFirstname] = useState('');
   const [lastName, setLastname] = useState('');
-  const [userid, setUserid] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordRetype, setRetypePassword] = useState('');
+  //const [address, setAddress] = useState('');
 
   const signup = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'user', userCredential.user.uid), {
+      const creationTimestamp = userCredential.user.metadata.creationTime;
+      const uid = userCredential.user.uid;
+  
+      await setDoc(doc(db, 'Admin', uid), {
+        username: username,
+        email: email,
         firstName: firstName,
         lastName: lastName,
-        userid: userid,
+        //address: address,  //Do we need address????
+        created_At: creationTimestamp
       });
       router.push('/success'); //redirect to admin dashboard
     } catch (error) {
@@ -70,6 +78,22 @@ export default function adminSignup() {
                     type="lastName"
                     autoComplete="lastName"
                     onChange={(e) => setLastname(e.target.value)}
+                    required
+                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium leading-6 text-white">
+                  Username
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="username"
+                    name="username"
+                    type="username"
+                    autoComplete="username"
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                   />
