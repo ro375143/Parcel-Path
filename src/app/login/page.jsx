@@ -13,23 +13,25 @@ export default function Login() {
   const [user, loading] = useAuthState(auth);
   const router = useRouter();
 
-  useEffect(() => {
-    if (user && !loading) {
-      router.push('/'); // Redirect to home if already logged in
-    }
-  }, [user, loading, router]);
-
   const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
         const res = await signInWithEmailAndPassword(email, password);
         console.log(res)
-        setEmail('');
-        setPassword('');
-        router.push('/register')
     } catch(e){
       console.error(e)
     }
   };
+
+  useEffect(() => {
+    if (user && !loading) {
+      router.push('/'); // Redirect to home if already logged in
+    } else {
+        // setEmail('');
+        // setPassword('');
+        // router.push('/register')
+    }
+  }, [user, loading, router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

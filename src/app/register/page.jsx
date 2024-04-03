@@ -2,12 +2,15 @@
 import { useState } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/app/firebase/config'
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
+  const router = useRouter();
+
 
   const handleSubmit = async () => {
     event.preventDefault(); // Prevent default form submission
@@ -16,7 +19,7 @@ export default function Register() {
       console.log(res)
       setEmail('')
       setPassword('')
-
+      router.push('/login')
     } catch(e){
       console.error(e)
     }
