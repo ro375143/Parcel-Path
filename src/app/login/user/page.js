@@ -76,7 +76,7 @@ export default function Signin() {
 
             <div>
               <button
-                onClick={() => signIn('credentials', { email, password, redirect: true, callbackUrl: '/' })} //redirect to admin-dashboard
+                onClick={() => signIn('credentials', { email, password, redirect: true, callbackUrl: '/success' })} //redirect to admin-dashboard
                 disabled={!email || !password}
                 className="disabled:opacity-40 flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" style={{backgroundColor: '#345454', transition: 'background-color 0.3s' }}
                 onMouseOver={(e) => e.target.style.backgroundColor = '#a4d7bb'}

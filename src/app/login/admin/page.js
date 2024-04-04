@@ -23,7 +23,7 @@ export default function Signin() {
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
             className="mx-auto h-10 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=%345454"
+            src="https://tailwindui.com/img/logos/mark.svg?color=%23345454"
             alt="Your Company"
           />
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
@@ -90,7 +90,7 @@ export default function Signin() {
 
         <p className="mt-10 text-center text-sm text-gray-400" style={{color: "#a4d7bb"}}>
           Not a member?{' '}
-          <button onClick={() => router.push('../register/admin')} className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300 "style={{color: "#345454"}}>
+          <button onClick={() => router.push('/register/admin')} className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300 "style={{color: "#345454"}}>
             Sign Up
           </button>
         </p>
