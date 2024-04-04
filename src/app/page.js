@@ -1,15 +1,27 @@
 'use client'
 import React from 'react';
 import './page.module.css';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
+import { auth } from '../firebase/firebase';
+import 'firebase/auth';
 
-const HomePage = () => {
-  const router = useRouter();
-  router.push('/');
-  
+
+export default function  HomePage() {
+  const session = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect('/login');
+    },
+  })
+  const uid = auth.currentUser?.uid;
+
   return (
     <>
       <div className='homepage-background'>
+        <div className='text-black'>Email: {session?.data?.user?.email}</div>
+        <div className='text-black'>UID: {uid}</div>
+        <button className='text-black' onClick={() => signOut()}>Logout</button>
         <h1>HomePage or Landing Page</h1>
       </div>
       <main>
@@ -21,4 +33,4 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis ferment
   );
 }
 
-export default HomePage;
+HomePage.requireAuth = true;

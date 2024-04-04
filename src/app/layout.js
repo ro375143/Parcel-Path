@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full bg-gray-900">
-      <body className={inter.className} style={{backgroundColor: '#f4e8c4', minHeight: '100vh'}}>
+      <body className={inter.className} style={{backgroundColor: '#f4e8c4', minHeight: '120vh'}}>
       <Navbar />
       <div className="flex-1">
           <SessionProvider>
