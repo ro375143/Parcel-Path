@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/app/firebase/config'
 import { useRouter } from 'next/navigation';
+import { createUserProfile } from '@/app/firebase/utils'
+
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -12,18 +14,42 @@ export default function Register() {
   const router = useRouter();
 
 
-  const handleSubmit = async () => {
-    event.preventDefault(); // Prevent default form submission
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   try {
+  //     const userCredential = await createUserWithEmailAndPassword(email, password);
+  //     if (userCredential.user) {
+  //       await createUserProfile(userCredential.user.uid, email); // Set the user's role in Firestore
+  //       console.log("User profile created successfully.");
+  //       setEmail('');
+  //       setPassword('');
+  //       router.push('/login'); // Redirect to login page or perhaps a welcome page
+  //     }
+  //   } catch(e) {
+  //     console.error(e);
+  //   }
+  // };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
-      const res = await createUserWithEmailAndPassword(email, password)
-      console.log(res)
-      setEmail('')
-      setPassword('')
-      router.push('/login')
-    } catch(e){
-      console.error(e)
+      const userCredential = await createUserWithEmailAndPassword(email, password);
+      if (userCredential && userCredential.user) {
+        await createUserProfile(userCredential.user.uid, email);
+        console.log("User profile created successfully.");
+        setEmail('');
+        setPassword('');
+        router.push('/login');
+      } else {
+        // Handle case where user creation fails but no error is thrown
+        console.error("Failed to create user account.");
+      }
+    } catch(e) {
+      console.error(e);
+      // Display error message to user, e.g., using a state variable
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
