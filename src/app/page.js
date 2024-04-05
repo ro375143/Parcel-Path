@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './page.module.css';
 import { redirect } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -14,7 +14,20 @@ export default function  HomePage() {
       redirect('/login');
     },
   })
-  const uid = auth.currentUser?.uid;
+
+  const [uid, setUid] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUid(user.uid);
+      } else {
+        setUid(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []); 
 
   return (
     <>
