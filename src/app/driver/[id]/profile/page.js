@@ -1,10 +1,8 @@
 import React from 'react';
-
+import UserProfile from '@/components/UserProfile';
 const DriverProfile = () => {
   return (
-    <div>
-      <h1>Driver Profile</h1>
-    </div>
+    <UserProfile></UserProfile>
   );
 }
 

@@ -1,10 +1,8 @@
 import React from 'react';
-
+import UserProfile from '@/components/UserProfile';
 const AdminProfilePage = () => {
   return (
-    <div>
-      <h1>Admin Profile Page</h1>
-    </div>
+    <UserProfile></UserProfile>
   );
 }
 
