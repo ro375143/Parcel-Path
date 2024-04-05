@@ -3,17 +3,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Form, Button, Input } from 'antd';
 import { auth, db } from '../firebase/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const UserProfile = (props) => {
                   const [form] = Form.useForm();
                   const [inputEnabled, setInput] = useState(true);
                   const [userInfo, setUserInfo] = useState(null);
-
-                  //var for the edit fields
-                  const [firstNameEdit, setFirstNameEdit] = useState();
-                  const [lastNameEdit, setLastNameEdit] = useState();
-                  const [addressEdit, setAddressEdit] = useState();
 
                   const defaultUser = {
                                     userName: "testing@testing.com",
@@ -78,10 +73,23 @@ const UserProfile = (props) => {
 
                                     //TODO make sure that the doc gets updated
                                     await updateDoc(doc(db, 'user', auth.currentUser.uid), {
-                                                      firstName: firstNameEdit,
-                                                      lastName: lastNameEdit,
-                                                      email: addressEdit
+                                                      firstName: userInfo.firstName,
+                                                      lastName: userInfo.lastName,
+                                                      address: userInfo.address
                                     })
+                  }
+
+                  //input change handlers
+                  function handleFirstNameChange(ev) {
+                                    setUserInfo({ ...userInfo, firstName: ev.target.value })
+                  }
+
+                  function handleLastNameChange(ev) {
+                                    setUserInfo({ ...userInfo, lastName: ev.target.value })
+                  }
+
+                  function handleAddressChange(ev) {
+                                    setUserInfo({ ...userInfo, address: ev.target.value })
                   }
 
                   const cancelEditMode = () => {
@@ -110,21 +118,21 @@ const UserProfile = (props) => {
                                                                         label="First Name"
                                                                         rules={[{ required: true, message: 'Please input your first name!' }]}
                                                       >
-                                                                        <Input disabled={inputEnabled} onChange={(e) => setFirstNameEdit(e.target.value)} />
+                                                                        <Input disabled={inputEnabled} onChange={handleFirstNameChange} />
                                                       </Form.Item>
                                                       <Form.Item
                                                                         name="lastName"
                                                                         label="Last Name"
                                                                         rules={[{ required: true, message: 'Please input your last name!' }]}
                                                       >
-                                                                        <Input disabled={inputEnabled} onChange={(e) => setLastNameEdit(e.target.value)} />
+                                                                        <Input disabled={inputEnabled} onChange={handleLastNameChange} />
                                                       </Form.Item>
                                                       <Form.Item
                                                                         name="address"
                                                                         label="Address"
                                                                         rules={[{ required: true, message: 'Please input your address!' }]}
                                                       >
-                                                                        <Input disabled={inputEnabled} onChange={(e) => setAddressEdit(e.target.value)} />
+                                                                        <Input disabled={inputEnabled} onChange={handleAddressChange} />
                                                       </Form.Item>
                                                       {inputEnabled ? (
                                                                         <Button onClick={editUser} disabled={!inputEnabled}>Edit User</Button>) :
