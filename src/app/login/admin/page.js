@@ -12,7 +12,7 @@ export default function Signin() {
 
   const signInWithEmailAndPasswordAndRedirect = (email, password) => {
     try {
-      signInWithEmailAndPassword(auth, email, password) && signIn('credentials', { email, password, redirect: true, callbackUrl: '/' });
+      signInWithEmailAndPassword(auth, email, password) && signIn('credentials', { email, password, redirect: true, callbackUrl: '/' }); //redirect to admin-dashboard
       
     } catch (error) {
 
