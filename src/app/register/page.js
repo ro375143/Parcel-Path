@@ -16,12 +16,16 @@ export default function Register() {
           </div>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm overflow-hidden bg-white shadow-lg p-6" style={{backgroundColor: '#5b9c7a'} }>
           <div className="sm:mx-auto sm:w-full sm:max-w-sm" >
-            <img
-              className="mx-auto h-10 w-auto"
-              src="https://tailwindui.com/img/logos/mark.svg?color=%345454"
-              alt="Your Company"
-            />
-            <h2 className="mt-10 text-center text-2xl font-bold leading-4 tracking-tight text-white">
+          <div className="flex justify-center">
+              <div style={{ width: '300px', height: '90px', overflow: 'hidden' }}>
+                <img
+                  style={{ width: '100%', height: '120%', objectFit: 'cover'}}
+                  src="https://media.discordapp.net/attachments/1197323344937234464/1225573887639814289/parcel_path_7.png?ex=66219fa0&is=660f2aa0&hm=45169aea1948b7dc2d1feb88e3fd3bd659c090f1d51ff8b11afe9521f84fe9f7&=&format=webp&quality=lossless"
+                  alt="Your Company"
+                />
+              </div>
+            </div>
+            <h2 className="mt-6 text-center text-2xl font-bold leading-4 tracking-tight text-white">
               Create an Account
             </h2>
           </div>
@@ -31,7 +35,8 @@ export default function Register() {
               <div>
                 <button
                   onClick={() => router.push('register/user')} //redirect to admin-dashboard
-                  className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" style={{backgroundColor: '#345454', transition: 'background-color 0.3s' }}
+                  className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm shadow-lg font-semibold leading-6 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  style={{ backgroundColor: '#345454', transition: 'background-color 0.3s' }}
                   onMouseOver={(e) => e.target.style.backgroundColor = '#a4d7bb'}
                   onMouseOut={(e) => e.target.style.backgroundColor = '#345454'}
                 >
@@ -41,7 +46,8 @@ export default function Register() {
               <div>
                 <button
                   onClick={() => router.push('register/admin')} //redirect to admin-dashboard
-                  className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" style={{backgroundColor: '#345454', transition: 'background-color 0.3s' }}
+                  className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm shadow-lg font-semibold leading-6 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  style={{ backgroundColor: '#345454', transition: 'background-color 0.3s' }}
                   onMouseOver={(e) => e.target.style.backgroundColor = '#a4d7bb'}
                   onMouseOut={(e) => e.target.style.backgroundColor = '#345454'}
                 >

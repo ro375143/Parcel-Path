@@ -34,12 +34,16 @@ export default function Signin() {
           </div>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            className="mx-auto h-10 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=%345454"
-            alt="Your Company"
-          />
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
+        <div className="flex justify-center">
+              <div style={{ width: '300px', height: '90px', overflow: 'hidden' }}>
+                <img
+                  style={{ width: '100%', height: '120%', objectFit: 'cover'}}
+                  src="https://media.discordapp.net/attachments/1197323344937234464/1225573887639814289/parcel_path_7.png?ex=66219fa0&is=660f2aa0&hm=45169aea1948b7dc2d1feb88e3fd3bd659c090f1d51ff8b11afe9521f84fe9f7&=&format=webp&quality=lossless"
+                  alt="Your Company"
+                />
+              </div>
+            </div>
+          <h2 className="mt-5 text-center text-2xl font-bold leading-9 tracking-tight text-white">
             Sign in to your account
           </h2>
         </div>
