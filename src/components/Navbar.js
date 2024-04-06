@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { MenuOutlined } from '@ant-design/icons';
 import styles from './Navbar.module.css';
-import { useSession, signOut } from 'next-auth/react'; // Import signOut
-import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react'; 
+
 
 const navLinks = [
   { name: 'Shipping', path: '/shipping' },
@@ -23,15 +23,8 @@ const guestLinks = [
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const router = useRouter();
   const { data: session } = useSession();
-
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-
-  const handleLogout = async () => {
-    await signOut(); // Call signOut to logout the user
-    router.push('/'); // Redirect to home page after logout
-  };
 
   const renderLinks = (links) =>
     links.map((link, index) => (

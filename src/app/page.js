@@ -34,7 +34,6 @@ export default function  HomePage() {
       <div className='homepage-background'>
         <div className='text-black'>Email: {session?.data?.user?.email}</div>
         <div className='text-black'>UID: {uid}</div>
-        <button className='text-black' onClick={() => signOut()}>Logout</button>
         <h1>HomePage or Landing Page</h1>
       </div>
       <main>
