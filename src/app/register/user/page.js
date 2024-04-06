@@ -40,7 +40,7 @@ export default function UserSignup() {
         lastName,
         created_At: creationTimestamp,
       });
-      router.push("/login/user"); // Redirect after successful signup
+      router.push("/login/admin"); // Redirect after successful signup
     } catch (error) {
       console.error("Error signing up:", error);
       setErrorMessage(error.message);
