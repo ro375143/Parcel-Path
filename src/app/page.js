@@ -1,15 +1,39 @@
 'use client'
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './page.module.css';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
+import { auth } from '../firebase/firebase';
+import 'firebase/auth';
 
-const HomePage = () => {
-  const router = useRouter();
-  router.push('/');
-  
+
+export default function  HomePage() {
+  const session = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect('/login');
+    },
+  })
+
+  const [uid, setUid] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUid(user.uid);
+      } else {
+        setUid(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []); 
+
   return (
     <>
       <div className='homepage-background'>
+        <div className='text-black'>Email: {session?.data?.user?.email}</div>
+        <div className='text-black'>UID: {uid}</div>
         <h1>HomePage or Landing Page</h1>
       </div>
       <main>
@@ -21,4 +45,4 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis ferment
   );
 }
 
-export default HomePage;
+HomePage.requireAuth = true;
