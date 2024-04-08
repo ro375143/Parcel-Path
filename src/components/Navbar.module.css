@@ -4,10 +4,12 @@
     align-items: center;
     background-color: #345454;
     padding: 0 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   }
   
   .logoContainer {
-    flex-grow: 1;
+    flex-grow: 0;
+    justify-content: left;
   }
   
   .logoLink {
@@ -20,6 +22,7 @@
   .navLinksContainer {
     display: flex;
     align-items: center;
+    
   }
   
   .navLinks, .navLinksActive {

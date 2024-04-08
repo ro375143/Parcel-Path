@@ -1,64 +1,56 @@
-'use client'
-import { useRouter } from 'next/navigation';
+"use client";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
   const router = useRouter();
 
   return (
-    <div className="flex justify-center items-center h-screen">
-       <div className="max-w-xl bg-white shadow-lg rounded-lg overflow-hidden flex">
-        <div className="w-56 flex-shrink-auto rounded-lg">
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="max-w-xl bg-white shadow-lg rounded-lg overflow-hidden flex">
+        <div className="w-56 flex-shrink-0 rounded-lg overflow-hidden">
           <img
             className="w-full h-full object-cover"
             src="https://blog.ecabrella.com/hs-fs/hubfs/AdobeStock_299668592.jpeg?width=5569&name=AdobeStock_299668592.jpeg"
-            alt="Your Image"
+            alt="Registration"
           />
-          </div>
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm overflow-hidden bg-white shadow-lg p-6" style={{backgroundColor: '#5b9c7a'} }>
-          <div className="sm:mx-auto sm:w-full sm:max-w-sm" >
+        </div>
+        <div className="flex flex-1 flex-col justify-center p-6 bg-[#5b9c7a]">
+          <div className="mx-auto w-full max-w-md">
             <img
-              className="mx-auto h-10 w-auto"
-              src="https://tailwindui.com/img/logos/mark.svg?color=%345454"
+              className="mx-auto h-12 w-auto"
+              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
               alt="Your Company"
             />
-            <h2 className="mt-10 text-center text-2xl font-bold leading-4 tracking-tight text-white">
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
               Create an Account
             </h2>
-          </div>
-          <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <div className="space-y-6">
-              <div></div>
-              <div>
-                <button
-                  onClick={() => router.push('register/user')} //redirect to admin-dashboard
-                  className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" style={{backgroundColor: '#345454', transition: 'background-color 0.3s' }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#a4d7bb'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#345454'}
-                >
-                  Customer Sign up
-                </button>
-              </div>
-              <div>
-                <button
-                  onClick={() => router.push('register/admin')} //redirect to admin-dashboard
-                  className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" style={{backgroundColor: '#345454', transition: 'background-color 0.3s' }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#a4d7bb'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#345454'}
-                >
-                  Register Business
-                </button>
-              </div>
+            <div className="mt-8 space-y-4">
+              <button
+                onClick={() => router.push("/register/user")}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Customer Sign up
+              </button>
+              <button
+                onClick={() => router.push("/register/admin")}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Register Business
+              </button>
             </div>
           </div>
-    
-          <p className="mt-10 text-center text-sm" style={{color: "#a4d7bb"}}>
-            Already a member?{' '}
-            <button onClick={() => router.push('login')} className="font-bold leading-6 text-indigo-400 hover:text-indigo-300" style={{color: "#345454"}}>
+
+          <p className="mt-6 text-center text-sm text-white">
+            Already a member?{" "}
+            <a
+              onClick={() => router.push("/login")}
+              className="cursor-pointer font-bold text-indigo-500 hover:text-indigo-700"
+            >
               Sign In
-            </button>
+            </a>
           </p>
         </div>
       </div>
-      </div>
+    </div>
   );
 }
