@@ -11,8 +11,8 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         name: packageData.name,
         description: packageData.description,
         status: packageData.status,
-        customerId: packageData.customerId,
         // trackingNumber is now auto-generated, no need to edit
+        trackingNumber: packageData.trackingNumber,
         packageWeight: packageData.packageWeight
           ? packageData.packageWeight
           : 0,
@@ -87,13 +87,6 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
             <Select.Option value="In Transit">In Transit</Select.Option>
             <Select.Option value="Delivered">Delivered</Select.Option>
           </Select>
-        </Form.Item>
-        <Form.Item
-          name="customerId"
-          label="Customer ID"
-          rules={[{ required: true, message: "Please input the customer ID!" }]}
-        >
-          <Input />
         </Form.Item>
         <Form.Item
           name="trackingNumber"

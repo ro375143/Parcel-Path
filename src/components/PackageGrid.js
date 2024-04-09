@@ -12,6 +12,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import EditPackageModal from "./EditPackageModal";
+import CreatePackageModal from "./CreatePackage";
 import ButtonRenderer from "./ButtonRenderer";
 import { Button, Input, Row, Col, Modal } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
@@ -20,8 +21,9 @@ import { Timestamp } from "firebase/firestore";
 
 const PackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentPackage, setCurrentPackage] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // New state for create modal visibility
 
   const columns = [
     { headerName: "ID", field: "id", flex: 1 },
@@ -93,12 +95,21 @@ const PackagesGrid = () => {
 
   const openEditModal = (packageData) => {
     setCurrentPackage(packageData);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
   const closeEditModal = () => {
-    setIsModalOpen(false);
+    setIsEditModalOpen(false);
     setCurrentPackage(null);
+  };
+
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+    fetchPackages(); // Optionally fetch packages again to reflect the newly added package
   };
 
   const savePackage = async (id, updatedData) => {
@@ -154,7 +165,7 @@ const PackagesGrid = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => console.log("Add new package")}
+            onClick={openCreateModal}
           >
             Add Package
           </Button>
@@ -167,12 +178,18 @@ const PackagesGrid = () => {
           domLayout="autoHeight"
         />
       </div>
-      {isModalOpen && currentPackage && (
+      {isEditModalOpen && currentPackage && (
         <EditPackageModal
-          isOpen={isModalOpen}
+          isOpen={isEditModalOpen}
           onClose={closeEditModal}
           packageData={currentPackage}
           onSave={savePackage}
+        />
+      )}
+      {isCreateModalOpen && (
+        <CreatePackageModal
+          isOpen={isCreateModalOpen}
+          onClose={closeCreateModal}
         />
       )}
     </div>
