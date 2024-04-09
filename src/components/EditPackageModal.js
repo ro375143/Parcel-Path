@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select, DatePicker, InputNumber } from 'antd';
-import moment from 'moment';
+import React, { useEffect } from "react";
+import { Modal, Form, Input, Select, DatePicker, InputNumber } from "antd";
+import moment from "moment";
 
 const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (packageData) {
-      // set form values when packageData changes
       form.setFieldsValue({
         name: packageData.name,
         description: packageData.description,
         status: packageData.status,
         customerId: packageData.customerId,
-        trackingNumber: packageData.trackingNumber,
-        packageWeight: packageData.packageWeight ? packageData.packageWeight : 0,
-        packageDimensions: packageData.packageDimensions ? packageData.packageDimensions : '',
-        shipDate: packageData.shipDate ? moment(packageData.shipDate.toDate()) : null,
-        deliveryDate: packageData.deliveryDate ? moment(packageData.deliveryDate.toDate()) : null,
+        // trackingNumber is now auto-generated, no need to edit
+        packageWeight: packageData.packageWeight
+          ? packageData.packageWeight
+          : 0,
+        packageDimensions: packageData.packageDimensions
+          ? packageData.packageDimensions
+          : "",
+        shipDate: packageData.shipDate
+          ? moment(packageData.shipDate.toDate())
+          : null,
+        deliveryDate: packageData.deliveryDate
+          ? moment(packageData.deliveryDate.toDate())
+          : null,
       });
     }
   }, [packageData, form]);
@@ -26,11 +33,13 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
     form
       .validateFields()
       .then((values) => {
-        onSave(packageData.id, values);
+        // Don't save trackingNumber from form values since it's auto-generated
+        const { trackingNumber, ...valuesToSave } = values;
+        onSave(packageData.id, valuesToSave);
         onClose();
       })
       .catch((info) => {
-        console.log('Validate Failed:', info);
+        console.log("Validate Failed:", info);
       });
   };
 
@@ -47,29 +56,31 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         form={form}
         layout="vertical"
         initialValues={{
-          name: '',
-          description: '',
-          status: '',
+          name: "",
+          description: "",
+          status: "",
         }}
       >
         <Form.Item
           name="name"
           label="Package Name"
-          rules={[{ required: true, message: 'Please input the package name!' }]}
+          rules={[
+            { required: true, message: "Please input the package name!" },
+          ]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           name="description"
           label="Description"
-          rules={[{ required: true, message: 'Please input the description!' }]}
+          rules={[{ required: true, message: "Please input the description!" }]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           name="status"
           label="Status"
-          rules={[{ required: true, message: 'Please select a status!' }]}
+          rules={[{ required: true, message: "Please select a status!" }]}
         >
           <Select>
             <Select.Option value="Pending">Pending</Select.Option>
@@ -78,46 +89,55 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
           </Select>
         </Form.Item>
         <Form.Item
-        name="customerId"
-        label="Customer ID"
-        rules={[{ required: true, message: 'Please input the customer ID!' }]}
+          name="customerId"
+          label="Customer ID"
+          rules={[{ required: true, message: "Please input the customer ID!" }]}
         >
-        <Input />
+          <Input />
         </Form.Item>
         <Form.Item
-        name="trackingNumber"
-        label="Tracking Number"
-        rules={[{ required: false }]}
+          name="trackingNumber"
+          label="Tracking Number"
+          rules={[{ required: false }]}
         >
-        <Input disabled />
+          <Input disabled placeholder="" />
         </Form.Item>
         <Form.Item
-        name="packageWeight"
-        label="Package Weight"
-        rules={[{ required: true, message: 'Please input the package weight!' }]}
+          name="packageWeight"
+          label="Package Weight"
+          rules={[
+            { required: true, message: "Please input the package weight!" },
+          ]}
         >
-        <InputNumber min={0} step={0.01} style={{ width: '100%' }} suffix="lbs" />
+          <InputNumber
+            min={0}
+            step={0.01}
+            style={{ width: "100%" }}
+            suffix="lbs"
+          />
         </Form.Item>
         <Form.Item
-        name="packageDimensions"
-        label="Package Dimensions"
-        rules={[{ required: true, message: 'Please input the package dimensions!' }]}
+          name="packageDimensions"
+          label="Package Dimensions"
+          rules={[
+            { required: true, message: "Please input the package dimensions!" },
+          ]}
         >
-        <Input placeholder="L x W x H" />
+          <Input placeholder="L x W x H" />
         </Form.Item>
         <Form.Item
-        name="shipDate"
-        label="Ship Date"
-        rules={[{ required: false }]}
+          name="shipDate"
+          label="Ship Date"
+          rules={[{ required: false }]}
         >
-        <DatePicker disabled format="YYYY-MM-DD" />
+          <DatePicker disabled format="YYYY-MM-DD" />
         </Form.Item>
         <Form.Item
-        name="deliveryDate"
-        label="Delivery Date"
-        rules={[{ required: false }]}
+          name="deliveryDate"
+          label="Delivery Date"
+          rules={[{ required: false }]}
         >
-        <DatePicker format="YYYY-MM-DD" />
+          <DatePicker format="YYYY-MM-DD" />
         </Form.Item>
       </Form>
     </Modal>

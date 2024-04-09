@@ -51,7 +51,6 @@ const PackagesGrid = () => {
       flex: 1,
     },
 
-    // add other fields
     {
       headerName: "Actions",
       field: "id",
@@ -112,7 +111,10 @@ const PackagesGrid = () => {
       deliveryDate: updatedData.deliveryDate
         ? Timestamp.fromDate(new Date(updatedData.deliveryDate))
         : null,
-      // Add other fields conversion if necessary
+      packageWeight:
+        typeof updatedData.packageWeight === "number"
+          ? updatedData.packageWeight
+          : parseFloat(updatedData.packageWeight),
     };
 
     const packageRef = doc(db, "packages", id);
