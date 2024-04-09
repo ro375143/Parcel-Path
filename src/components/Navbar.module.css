@@ -70,3 +70,13 @@
     }
   }
   
+  .customLogoutButton {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    /* Additional styles for alignment and font could go here */
+  }
+  

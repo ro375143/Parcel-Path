@@ -25,11 +25,26 @@ const guestLinks = [
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [uid, setUid] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        const uid = user.uid.slice(0, 5);
+        setUid(uid);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setUserRole(userDocSnap.data().role);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUserRole(null);
+        setUid(null);
+      }
     });
 
     return () => unsubscribe();
@@ -40,7 +55,13 @@ const Navbar = () => {
   const renderLinks = (links) =>
     links.map((link, index) => (
       <li key={index}>
-        <Link href={link.path}>{link.name}</Link>
+        {link.name === "Logout" ? (
+          <button onClick={link.onClick} className={styles.customLogoutButton}>
+            {link.name}
+          </button>
+        ) : (
+          <Link href={link.path}>{link.name}</Link>
+        )}
       </li>
     ));
 
@@ -51,7 +72,7 @@ const Navbar = () => {
           <div style={{ width: "300px", height: "90px", overflow: "hidden" }}>
             <img
               style={{ width: "100%", height: "89%", objectFit: "cover" }}
-              src="https://media.discordapp.net/attachments/1197323344937234464/1225574738068508753/parcel_path_9.png?ex=6621a06b&is=660f2b6b&hm=e1ee65b52c9e507fd5a5de0640e25276c808d8a2d1c165af9add2d0c509987be&=&format=webp&quality=lossless"
+              src="your-image-url-here"
               alt="Your Image"
             />
           </div>
