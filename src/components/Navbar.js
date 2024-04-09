@@ -12,7 +12,10 @@ const navLinks = [
   { name: "Support", path: "/support" },
 ];
 
-const authLinks = [{ name: "Account", path: "/account" }];
+const authLinks = [
+  { name: "Account", path: "/account" },
+  { name: "Logout", path: "/logout" },
+];
 
 const guestLinks = [
   { name: "Login", path: "/login" },
@@ -33,12 +36,6 @@ const Navbar = () => {
   }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => router.push("/login"))
-      .catch((error) => console.error("Logout Error", error));
-  };
 
   const renderLinks = (links) =>
     links.map((link, index) => (
@@ -66,14 +63,7 @@ const Navbar = () => {
         >
           {renderLinks(navLinks)}
           {isAuthenticated ? (
-            <>
-              {renderLinks(authLinks)}
-              <li className={styles.logoutButtonContainer}>
-                <button onClick={handleLogout} className={styles.logoutButton}>
-                  Logout
-                </button>
-              </li>
-            </>
+            <>{renderLinks(authLinks)}</>
           ) : (
             renderLinks(guestLinks)
           )}
