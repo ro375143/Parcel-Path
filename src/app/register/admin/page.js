@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "@/app/firebase/config";
 import { doc, setDoc } from "firebase/firestore";
 import { message } from "antd";
@@ -34,7 +34,7 @@ export default function AdminSignUp() {
       const creationTimestamp = userCredential.user.metadata.creationTime;
       const uid = userCredential.user.uid;
 
-      await setDoc(doc(db, "admins", uid), {
+      await setDoc(doc(db, "users", uid), {
         username,
         email,
         firstName,
@@ -42,9 +42,13 @@ export default function AdminSignUp() {
         created_At: creationTimestamp,
         role: "admin",
       });
-      message.success("Sign up successful! Please sign in.", 10);
 
-      router.push("/login/admin"); // Redirect to login after successful signup
+      // Sign out the user immediately after account creation
+      await signOut(auth); // This line is crucial
+
+      message.success("Sign up successful! Please sign in.", 10);
+      // Now redirect to login page
+      router.push("/login/admin");
     } catch (error) {
       console.error("Error signing up:", error);
       setErrorMessage(error.message);

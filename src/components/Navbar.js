@@ -3,24 +3,9 @@ import Link from "next/link";
 import { MenuOutlined } from "@ant-design/icons";
 import styles from "./Navbar.module.css";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
-import { useRouter } from "next/navigation";
-
-const navLinks = [
-  { name: "Shipping", path: "/shipping" },
-  { name: "Tracking", path: "/tracking" },
-  { name: "Support", path: "/support" },
-];
-
-const authLinks = [
-  { name: "Account", path: "/account" },
-  { name: "Logout", path: "/logout" },
-];
-
-const guestLinks = [
-  { name: "Login", path: "/login" },
-  { name: "Register", path: "/register" },
-];
+import { auth, db } from "@/app/firebase/config";
+import { useRouter } from "next/navigation"; // Assuming next/navigation is correct for your setup
+import { doc, getDoc } from "firebase/firestore";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,12 +18,17 @@ const Navbar = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
-        const uid = user.uid.slice(0, 5);
+        const uid = user.uid; // Use the full UID
         setUid(uid);
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          setUserRole(userDocSnap.data().role);
+
+        // Fetch the user role from the 'users' collection
+        const userDocRef = doc(db, "users", uid);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists() && docSnap.data().role) {
+          setUserRole(docSnap.data().role); // Set the user role based on document
+        } else {
+          console.error("User document does not exist or role is missing.");
+          setIsAuthenticated(false); // Optionally handle as unauthenticated
         }
       } else {
         setIsAuthenticated(false);
@@ -50,7 +40,44 @@ const Navbar = () => {
     return () => unsubscribe();
   }, []);
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/login");
+      setIsAuthenticated(false);
+      setUserRole(null);
+      setUid(null);
+    } catch (error) {
+      console.error("Logout Error", error);
+    }
+  };
+
+  const roleBasedLinks = {
+    customer: [
+      { name: "Dashboard", path: `/user/${uid}/dashboard` },
+      { name: "Feedback", path: `/user/${uid}/feedback` },
+      { name: "Profile", path: `/user/${uid}/profile` },
+      { name: "Tracking", path: `/user/${uid}/tracking` },
+    ],
+    driver: [
+      { name: "Dashboard", path: `/driver/${uid}/dashboard` },
+      { name: "Feedback", path: `/driver/${uid}/feedback` },
+      { name: "Profile", path: `/driver/${uid}/profile` },
+    ],
+    admin: [
+      { name: "Dashboard", path: `/admin/${uid}/dashboard` },
+      { name: "Feedback", path: `/admin/${uid}/feedback` },
+      { name: "Profile", path: `/admin/${uid}/profile` },
+    ],
+  };
+
+  const logoutLink = { name: "Logout", onClick: handleLogout };
+
+  const unauthenticatedLinks = [
+    { name: "Track", path: "/tracking" },
+    { name: "Register", path: "/register" },
+    { name: "Login", path: "/login" },
+  ];
 
   const renderLinks = (links) =>
     links.map((link, index) => (
@@ -60,10 +87,24 @@ const Navbar = () => {
             {link.name}
           </button>
         ) : (
-          <Link href={link.path}>{link.name}</Link>
+          <Link href={link.path} key={index} legacyBehavior>
+            {link.name}
+          </Link>
         )}
       </li>
     ));
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+  const getLinksForRole = () => {
+    if (!isAuthenticated) return unauthenticatedLinks;
+    const roleLinks = roleBasedLinks[userRole];
+    if (!roleLinks) {
+      console.error("Unrecognized role or role not yet loaded:", userRole);
+      return []; // Optionally, return a default set of links or empty array
+    }
+    return [...roleLinks, logoutLink];
+  };
 
   return (
     <nav className={styles.navbar}>
@@ -72,8 +113,8 @@ const Navbar = () => {
           <div style={{ width: "300px", height: "90px", overflow: "hidden" }}>
             <img
               style={{ width: "100%", height: "89%", objectFit: "cover" }}
-              src="your-image-url-here"
-              alt="Your Image"
+              src="https://media.discordapp.net/attachments/1197323344937234464/1225574738068508753/parcel_path_9.png?ex=6621a06b&is=660f2b6b&hm=e1ee65b52c9e507fd5a5de0640e25276c808d8a2d1c165af9add2d0c509987be&=&format=webp&quality=lossless"
+              alt="Your Logo"
             />
           </div>
         </Link>
@@ -82,12 +123,7 @@ const Navbar = () => {
         <ul
           className={isMobileMenuOpen ? styles.navLinksActive : styles.navLinks}
         >
-          {renderLinks(navLinks)}
-          {isAuthenticated ? (
-            <>{renderLinks(authLinks)}</>
-          ) : (
-            renderLinks(guestLinks)
-          )}
+          {renderLinks(getLinksForRole())}
         </ul>
         <button onClick={toggleMobileMenu} className={styles.mobileMenuButton}>
           <MenuOutlined />
