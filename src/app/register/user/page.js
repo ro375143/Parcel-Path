@@ -6,7 +6,7 @@ import { auth, db } from "@/app/firebase/config";
 import { doc, setDoc } from "firebase/firestore";
 import { message } from "antd";
 
-export default function UserSignup() {
+export default function CustomerSignUp() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -34,17 +34,17 @@ export default function UserSignup() {
       const creationTimestamp = userCredential.user.metadata.creationTime;
       const uid = userCredential.user.uid;
 
-      await setDoc(doc(db, "customers", uid), {
+      await setDoc(doc(db, "admins", uid), {
         username,
         email,
         firstName,
         lastName,
         created_At: creationTimestamp,
-        role: "customer",
+        role: "admin",
       });
       message.success("Sign up successful! Please sign in.", 10);
 
-      router.push("/login/user");
+      router.push("/login/admin"); // Redirect to login after successful signup
     } catch (error) {
       console.error("Error signing up:", error);
       setErrorMessage(error.message);
@@ -72,14 +72,16 @@ export default function UserSignup() {
           style={{ backgroundColor: "#5b9c7a" }}
         >
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <img
-              className="mx-auto h-12 w-auto"
-              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-              alt="Your Company"
-            />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-              Sign up for an account
-            </h2>
+            <div className="text-center">
+              <div
+                className="inline-block bg-white rounded-lg px-4 py-2 shadow-xl"
+                style={{ backgroundColor: "#345454" }}
+              >
+                <h2 className="text-2xl font-extrabold text-white">
+                  Register Customer Account
+                </h2>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -97,7 +99,7 @@ export default function UserSignup() {
                   type="text"
                   autoComplete="given-name"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
@@ -116,7 +118,7 @@ export default function UserSignup() {
                   type="text"
                   autoComplete="family-name"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                 />
@@ -135,7 +137,7 @@ export default function UserSignup() {
                   type="text"
                   autoComplete="username"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -154,7 +156,7 @@ export default function UserSignup() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -174,7 +176,7 @@ export default function UserSignup() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -202,7 +204,7 @@ export default function UserSignup() {
                     type={showRetypePassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={passwordRetype}
                     onChange={(e) => setPasswordRetype(e.target.value)}
                   />
@@ -225,8 +227,18 @@ export default function UserSignup() {
               <div>
                 <button
                   type="submit"
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="disabled:opacity-40 flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   disabled={!email || !password || password !== passwordRetype}
+                  style={{
+                    backgroundColor: "#345454",
+                    transition: "background-color 0.3s",
+                  }}
+                  onMouseOver={(e) =>
+                    (e.target.style.backgroundColor = "#a4d7bb")
+                  }
+                  onMouseOut={(e) =>
+                    (e.target.style.backgroundColor = "#345454")
+                  }
                 >
                   Sign Up
                 </button>
@@ -251,14 +263,18 @@ export default function UserSignup() {
             </div>
           </div>
 
-          <p className="mt-6 text-center text-sm text-white">
+          <p
+            className="mt-4 text-center text-sm text-gray-400"
+            style={{ color: "#a4d7bb" }}
+          >
             Already have an account?{" "}
-            <a
-              onClick={() => router.push("/login/user")}
-              className="font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer"
+            <button
+              onClick={() => router.push("../login/user")}
+              className="font-bold leading-6 text-green-400 hover:text-green-300"
+              style={{ color: "#345454" }}
             >
-              Sign in
-            </a>
+              Sign In
+            </button>
           </p>
         </div>
       </div>

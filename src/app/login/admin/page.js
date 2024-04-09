@@ -59,17 +59,34 @@ export default function AdminSignin() {
           </div>
           <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-              <img
-                className="mx-auto h-10 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt="Your Company"
-              />
-              <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
-                Sign in to your account
-              </h2>
+              <div className="flex justify-center">
+                <div
+                  style={{ width: "300px", height: "90px", overflow: "hidden" }}
+                >
+                  <img
+                    style={{
+                      width: "100%",
+                      height: "120%",
+                      objectFit: "cover",
+                    }}
+                    src="https://media.discordapp.net/attachments/1197323344937234464/1225573887639814289/parcel_path_7.png?ex=66219fa0&is=660f2aa0&hm=45169aea1948b7dc2d1feb88e3fd3bd659c090f1d51ff8b11afe9521f84fe9f7&=&format=webp&quality=lossless"
+                    alt="Your Company"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <div
+                  className="inline-block rounded-lg px-4 py-2 shadow-2xl"
+                  style={{ backgroundColor: "#345454" }}
+                >
+                  <h2 className="text-2xl font-bold leading-1 tracking-tight text-white">
+                    Admin Login
+                  </h2>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-md">
               <form onSubmit={handleSignIn} className="space-y-6">
                 <div>
                   <label
@@ -85,7 +102,7 @@ export default function AdminSignin() {
                       type="email"
                       autoComplete="email"
                       required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -106,7 +123,7 @@ export default function AdminSignin() {
                       type="password"
                       autoComplete="current-password"
                       required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -115,13 +132,10 @@ export default function AdminSignin() {
 
                 {/* Error Message */}
                 {errorMessage && (
-                  <div className="text-sm text-red-500">
+                  <div className="text-sm text-red-500 font-bold">
                     {errorMessage}
                     {errorMessage.includes("No user found") && (
-                      <button
-                        onClick={() => router.push("../register/user")}
-                        className="ml-1 text-indigo-400 hover:text-indigo-300 underline"
-                      >
+                      <button onClick={() => router.push("../register/admin")}>
                         Sign up
                       </button>
                     )}
@@ -131,7 +145,18 @@ export default function AdminSignin() {
                 <div>
                   <button
                     type="submit"
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    disabled={!email || !password}
+                    className="disabled:opacity-40 flex w-full shadow-2xl justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{
+                      backgroundColor: "#345454",
+                      transition: "background-color 0.3s",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.target.style.backgroundColor = "#a4d7bb")
+                    }
+                    onMouseOut={(e) =>
+                      (e.target.style.backgroundColor = "#345454")
+                    }
                   >
                     Sign in
                   </button>
@@ -139,12 +164,16 @@ export default function AdminSignin() {
               </form>
             </div>
 
-            <p className="mt-2 text-center text-sm text-gray-600">
+            <p
+              className="mt-4 text-center text-sm text-gray-400"
+              style={{ color: "#a4d7bb" }}
+            >
               Not a member?{" "}
               <a
                 href="#"
                 onClick={() => router.push("../register/user")}
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300 "
+                style={{ color: "#345454" }}
               >
                 Sign up now
               </a>
