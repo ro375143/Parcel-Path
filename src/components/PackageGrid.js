@@ -22,7 +22,8 @@ import { Timestamp } from "firebase/firestore";
 import { saveAs } from "file-saver";
 import { json2csv } from "json-2-csv";
 import moment from "moment";
-import AdminAssignPackage from "./AdminAssignPackage";
+import AdminAssignPackage from "@/components/AdminAssignPackage";
+import PackageQRCodeModal from "@/components/PackageQRCodeModal";
 
 const PackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -301,6 +302,9 @@ const PackagesGrid = () => {
         </Col>
         <Col>
           <AdminAssignPackage className={styles.actionButton} />
+        </Col>
+        <Col>
+          <PackageQRCodeModal />
         </Col>
       </Row>
       <div>
