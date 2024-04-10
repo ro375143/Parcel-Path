@@ -3,8 +3,8 @@ import PackagesGrid from '@/components/PackageGrid';
 
 const AdminPackageGrid = () => {
   return (
-    <div>
-      <h1>Packages</h1>
+    <div style={{padding: '10px', margin: '5px'}}>
+      <h1 style={{margin: '0', fontSize: '1rem'}}>PACKAGES</h1>
       <PackagesGrid />
     </div>
   );
