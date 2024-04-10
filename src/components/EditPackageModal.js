@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, DatePicker, InputNumber } from 'antd';
 import moment from 'moment';
+import './grids.css';
 
 const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
   const [form] = Form.useForm();
@@ -36,6 +37,7 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
 
   return (
     <Modal
+      className='modal-theme'
       title="Edit Package"
       open={isOpen}
       onOk={handleSave}
@@ -44,6 +46,7 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
       cancelText="Cancel"
     >
       <Form
+        className='package-form'
         form={form}
         layout="vertical"
         initialValues={{
@@ -57,24 +60,31 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
           label="Package Name"
           rules={[{ required: true, message: 'Please input the package name!' }]}
         >
-          <Input />
+          <Input
+          className='package-input'
+           />
         </Form.Item>
         <Form.Item
           name="description"
           label="Description"
           rules={[{ required: true, message: 'Please input the description!' }]}
         >
-          <Input />
+          <Input
+          className='package-input'
+           />
         </Form.Item>
         <Form.Item
           name="status"
           label="Status"
           rules={[{ required: true, message: 'Please select a status!' }]}
         >
-          <Select>
-            <Select.Option value="Pending">Pending</Select.Option>
-            <Select.Option value="In Transit">In Transit</Select.Option>
-            <Select.Option value="Delivered">Delivered</Select.Option>
+          <Select
+          className='package-form'
+            placeholder="Select a status"
+          >
+            <Select.Option className='package-form' value="Pending">Pending</Select.Option>
+            <Select.Option className='package-form' value="In Transit">In Transit</Select.Option>
+            <Select.Option className='package-form' value="Delivered">Delivered</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item
@@ -82,42 +92,54 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         label="Customer ID"
         rules={[{ required: true, message: 'Please input the customer ID!' }]}
         >
-        <Input />
+        <Input 
+        className='package-input'
+         />
         </Form.Item>
         <Form.Item
         name="trackingNumber"
         label="Tracking Number"
         rules={[{ required: false }]}
         >
-        <Input disabled />
+        <Input 
+        className='package-input'
+        disabled />
         </Form.Item>
         <Form.Item
         name="packageWeight"
         label="Package Weight"
         rules={[{ required: true, message: 'Please input the package weight!' }]}
         >
-        <InputNumber min={0} step={0.01} style={{ width: '100%' }} suffix="lbs" />
+        <InputNumber
+        className='package-input'
+         min={0} step={0.01} style={{ width: '100%' }} suffix="lbs" />
         </Form.Item>
         <Form.Item
         name="packageDimensions"
         label="Package Dimensions"
         rules={[{ required: true, message: 'Please input the package dimensions!' }]}
         >
-        <Input placeholder="L x W x H" />
+        <Input 
+        className='package-input'
+        placeholder="L x W x H" />
         </Form.Item>
         <Form.Item
         name="shipDate"
         label="Ship Date"
         rules={[{ required: false }]}
         >
-        <DatePicker disabled format="YYYY-MM-DD" />
+        <DatePicker
+        className='package-input'
+         disabled format="YYYY-MM-DD" />
         </Form.Item>
         <Form.Item
         name="deliveryDate"
         label="Delivery Date"
         rules={[{ required: false }]}
         >
-        <DatePicker format="YYYY-MM-DD" />
+        <DatePicker
+        className='package-input'
+         format="YYYY-MM-DD" />
         </Form.Item>
       </Form>
     </Modal>
