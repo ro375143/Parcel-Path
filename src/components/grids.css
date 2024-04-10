@@ -1,0 +1,224 @@
+.action-button {
+  background-color: #345454;
+  transition: all 0.3s ease-in-out;
+  color: '#f4e8c4';
+  border-radius: 5px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  margin: 5px;
+  padding: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  outline: none;
+}
+
+
+.action-button:hover{
+  background-color: #3bb873;
+  color:#345454;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+
+
+
+
+
+
+.grids-theme .ag-cell {
+  background-color: #a4d7bb;
+  transition: background-color 0.3s, color 0.3s; 
+}
+
+
+
+.grids-theme .ag-header-cell {
+  background-color: #345454;
+  transition: background-color 0.3s, color 0.3s;
+  
+}
+
+.grids-theme .ag-header-cell-text {
+  font-weight: bold;
+}
+
+.grids-theme .ag-header-cell:hover {
+  background-color: #a4d7bb;
+  color: #345454;
+}
+
+.grids-theme {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border-style: solid;
+  box-sizing: border-box;
+}
+
+.search-input .ant-input {
+  background-color: #5b9c7a;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  
+  margin: 20px;
+  border-radius: 5px;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+
+}
+
+.search-input .ant-input:hover,
+.search-input .ant-input:focus{
+  background-color: #3bb873;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  
+  
+}
+
+
+.search-input .ant-input::placeholder {
+  color: #345454;
+}
+
+
+
+
+.modal-theme .ant-modal-content {
+  background-color: #5b9c7a;
+  border-radius: 10px;
+  color : #f4e8c4;
+  padding: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.modal-theme .ant-modal-content:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.modal-theme .ant-modal-header {
+  background-color: #5b9c7a;
+  border-radius: 10px 10px 0 0;
+  color : #f4e8c4;
+}
+
+.modal-theme .ant-modal-footer {
+  background-color: #5b9c7a;
+  border-radius: 0 0 10px 10px;
+  color : #f4e8c4;
+}
+
+.modal-theme .ant-modal-footer button {
+  background-color: #345454;
+  color : #f4e8c4;
+  border-radius: 5px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.modal-theme .ant-modal-footer button:hover {
+  background-color: #a4d7bb;
+  color : #345454;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+.modal-theme .ant-modal-confirm-btns {
+  background-color: #5b9c7a;
+  border-radius: 0 0 10px 10px;
+  color : #345454
+}
+
+.modal-theme .ant-modal-confirm-btns button {
+  background-color: #345454;
+  color : #f4e8c4;
+  border-radius: 5px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.modal-theme .ant-modal-confirm-btns button:hover,
+.modal-theme .ant-modal-confirm-btns button:focus {
+  background-color: #345454;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+.feedback-form {
+  background-color: #5b9c7a;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+
+}
+
+.feedback-textarea {
+  background-color: #3bb873;
+  width: 100%;
+  padding: 20px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.package-form {
+  background-color: #5b9c7a;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+
+}
+.package-form .ant-form-item>label {
+  margin-bottom: 10px;
+  background-color: #5b9c7a;
+}
+
+.package-form .ant-select-selection {
+  background-color: #f4e8c4;
+  color: #345454;
+}
+
+.package-form .ant-select-selection:hover {
+  background-color: #3bb873;
+}
+
+.package-form .ant-picker {
+  background-color: #5b9c7a;
+  color: #345454;
+}
+
+.package-form .ant-picker-input > input {
+  
+  color: #345454;
+}
+
+.package-form .ant-picker:hover {
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  background-color: #3bb873;
+}
+
+.package-form .ant-picker-dropdown {
+  background-color: #3bb873;
+  color: #345454;
+}
+
+.package-input {
+  background-color: #5b9c7a;
+  border: none;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.package-input:hover {
+  background-color: #3bb873;
+}
+
+
+.package-input:focus {
+  background-color: #3bb873;
+}
+
+.package-input::placeholder {
+  color: #345454;
+}
+
+
+
+
+
