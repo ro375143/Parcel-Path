@@ -49,6 +49,8 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
         deliveryDate,
         shipDate: serverTimestamp(),
         trackingNumber,
+        driverAssigned: false, // Add driverAssigned field set to false
+        assignedDriverId: null, // Add assignedDriverId field set to null
       };
 
       await addDoc(collection(db, "packages"), packageData);

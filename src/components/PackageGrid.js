@@ -66,6 +66,14 @@ const PackagesGrid = () => {
       suppressMovable: true,
     },
     {
+      headerName: "Assigned Driver ID",
+      field: "assignedDriverId",
+      flex: 1,
+      minWidth: 150,
+      maxWidth: 300,
+      cellRenderer: (params) => params.value ?? "Not Assigned", // Display "Not Assigned" if no driver ID
+    },
+    {
       headerName: "Package Weight",
       field: "packageWeight",
       flex: 1,
