@@ -1,25 +1,34 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
-import { Form, Button, Input } from "antd";
 import { auth, db } from "@/app/firebase/config";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import React, { useState, useEffect } from 'react';
+import { PlusOutlined } from '@ant-design/icons';
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input
+} from 'antd';
+const { RangePicker } = DatePicker;
+const { TextArea } = Input;
+const normFile = (e) => {
+  if (Array.isArray(e)) {
+    return e;
+  }
+  return e?.fileList;
+};
 
-const UserProfile = (props) => {
+const UserProfile = () => {
   const [form] = Form.useForm();
   const [inputEnabled, setInput] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
 
-  // const defaultUser = {
-  //   userName: "test_customer@test.com",
-  //   password: "test123",
-  // };
+  const collectionsName = ["admins", "drivers", "customers"];
 
-  const collectionsName = ["admins", "drivers", "customers"]
-
-  async function getData (cName) {
+  async function getData(cName) {
     const uRef = doc(db, cName, auth.currentUser.uid);
-    const dSnap = await getDoc(uRef)
+    const dSnap = await getDoc(uRef);
     if (dSnap.data()) {
       return dSnap.data();
     }
@@ -38,80 +47,42 @@ const UserProfile = (props) => {
           address: data.address,
           email: auth.currentUser.email,
           type: collectionsName[i],
-          phone: data.phoneNo
+          phone: data.phoneNo,
         });
         return;
       }
     }
-    // console.log("UID is :" + auth.currentUser.uid);
-    // const userRef = doc(db, "ff", auth.currentUser.uid);
-    // console.log("User Reference is : " + userRef);
-    // const documentSnapshot = await getDoc(userRef);
-    // console.log(
-    //   "documentSnapshot is : " +
-    //     JSON.stringify(documentSnapshot.data())
-    // );
-
-    // setUserInfo({
-    //   firstName: "Dhana",
-    //   lastName: "Neo",
-    //   address: "email",
-    // })
   };
 
-  // const signInWithEmailAndPasswordFirebase = async (email, password) => {
-  //   try {
-  //     await signInWithEmailAndPassword(auth, email, password);
-  //     // router.route('/admin/id/profile')
-  //     // setUser(auth.currentUser)
-  //     userDatafromDB();
-  //   } catch (error) {
-  //     console.error("Error signing in:", error.message);
-  //     throw error;
-  //   }
-  // };
-
-  // const loadDefaultUser = async () => {
-  //   signInWithEmailAndPasswordFirebase(
-  //     defaultUser.userName,
-  //     defaultUser.password
-  //   );
-  //   console.log(
-  //     "CURRENT USER FROM DEFAULT is: " + JSON.stringify(auth.currentUser)
-  //   );
-  // };
-
   useEffect(() => {
-    if (userInfo) {
+    if (userInfo && form) {
       form.setFieldsValue({
         firstName: userInfo.firstName,
         lastName: userInfo.lastName,
         address: userInfo.address,
         email: userInfo.email,
         type: userInfo.type,
-        phone: userInfo.phone
+        phone: userInfo.phone,
       });
     }
-  });
+  }, [userInfo, form]);
 
   const editUser = () => {
     setInput(false);
-    console.log("edit user clicked " + inputEnabled);
   };
 
   const submitUser = async () => {
     setInput(true);
-    console.log("submit user clicked " + inputEnabled);
 
     await updateDoc(doc(db, userInfo.type, auth.currentUser.uid), {
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
       address: userInfo.address,
-      phoneNo: userInfo.phone
+      phoneNo: userInfo.phone,
     });
   };
 
-  //input change handlers
+  // Input change handlers
   function handleFirstNameChange(ev) {
     setUserInfo({ ...userInfo, firstName: ev.target.value });
   }
@@ -130,44 +101,29 @@ const UserProfile = (props) => {
 
   const cancelEditMode = () => {
     setInput(true);
-    console.log("submit user clicked " + inputEnabled);
   };
 
   if (!userInfo) {
     if (!auth.currentUser) {
       console.log("THERE IS NO USER");
-      //loadDefaultUser();
     } else {
-      console.log("There is a user.. Loading the info now")
+      console.log("There is a user.. Loading the info now");
       userDatafromDB();
     }
   }
-  // if (!userInfo) {
-  //   loadDefaultUser();
-  //   console.log("THERE IS NO USER");
-  // }
 
   return (
-    <div>
-      <div
-        style={{
-          fontWeight: "bold",
-          color: "blue",
-          fontSize: 25,
-          flex: true,
-          margin: 15,
-        }}
-      >
-        PROFILE PAGE
+    <>
+      <div style={{ background: '#e6f7ff', padding: '20px', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1890ff', textAlign: 'center' }}>Profile Page</h1>
       </div>
+      <div>
       <Form
         form={form}
-        layout="vertical"
-        initialValues={{
-          name: "",
-          description: "",
-          status: "",
-        }}
+        labelCol={{ span: 8 }}
+        wrapperCol={{ span: 14 }}
+        layout="horizontal"
+        style={{ maxWidth: 600 }}
       >
         <Form.Item
           name="firstName"
@@ -208,8 +164,9 @@ const UserProfile = (props) => {
           name="phone"
           label="Phone Number"
           rules={[{ required: true, message: "Phone Number!" }]}
+          style={{ marginBottom: '20px', padding: '10px' }} // Added padding for Phone Number
         >
-          <Input disabled={inputEnabled} onChange={handlePhoneChange}/>
+          <Input disabled={inputEnabled} onChange={handlePhoneChange} />
         </Form.Item>
         {inputEnabled ? (
           <Button onClick={editUser} disabled={!inputEnabled}>
@@ -226,8 +183,13 @@ const UserProfile = (props) => {
           </>
         )}
       </Form>
-    </div>
+      </div>
+    </>
   );
 };
 
 export default UserProfile;
+
+
+
+
