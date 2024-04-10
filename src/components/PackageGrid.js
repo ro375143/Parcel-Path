@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';  
 import { db } from '../firebase/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import EditPackageModal from './EditPackageModal';
@@ -11,12 +12,17 @@ import { Button, Input, Row, Col, Modal } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { Timestamp } from 'firebase/firestore';
+import './grids.css';
+import { saveAs } from 'file-saver';
+import { json2csv } from 'json-2-csv';
 
 
 const PackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPackage, setCurrentPackage] = useState(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
 
   const columns = [
     { headerName: "ID", field: "id", flex: 1 },
@@ -55,9 +61,10 @@ const PackagesGrid = () => {
           params={params} 
           onEdit={editPackage} 
           onDelete={deletePackage}
+      
         />
       ),
-      flex: 1
+      width: '210px'
 
     }    
   ];
@@ -88,6 +95,7 @@ const PackagesGrid = () => {
     await deleteDoc(doc(db, "packages", id));
     fetchPackages();
   };
+  
   
   
   const openEditModal = (packageData) => {
@@ -128,25 +136,72 @@ const PackagesGrid = () => {
     const querySnapshot = await getDocs(collection(db, "packages"));
     const packagesArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setRowData(packagesArray);
+    setFilteredData(packagesArray);
   };
+
+  const handleSearch = (value) => {
+    setSearchValue(value);
+    if (value) {
+      const filtered = rowData.filter((row) => {
+        return Object.keys(row).some((field) => {
+          return row[field].toString().toLowerCase().includes(value.toLowerCase());
+        });
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(rowData);
+    }
+  }
+
+  const exportData  = async () => {
+    const querySnapshot = await getDocs(collection(db, "packages"));
+    const packagesArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const csvData = packagesArray.map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        status: item.status,
+        customerId: item.customerId,
+        trackingNumber: item.trackingNumber,
+        packageWeight: item.packageWeight,
+        packageDimensions: item.packageDimensions,
+        shipDate: item.shipDate?.toDate ? moment(item.shipDate.toDate()).format("MM-DD-YYYY") : '',
+        deliveryDate: item.deliveryDate?.toDate ? moment(item.deliveryDate.toDate()).format("MM-DD-YYYY") : '',
+      };
+    }
+    );
+    const csv = await json2csv(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'packages.csv');
+  }
 
   return (
     <div>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      <Row gutter={16}>
         <Col>
-          <Input.Search placeholder="Search packages..." onSearch={value => console.log(value)} enterButton />
+          <Input.Search className='search-input' placeholder="Search packages..." onSearch={handleSearch} value={searchValue} onChange={(e) => handleSearch(e.target.value)} />
         </Col>
         <Col>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => console.log('Add new package')}>
+          <Button className='action-button' type="primary" icon={<PlusOutlined />} onClick={() => console.log('Add new package')} style={{margin: '20px'}}>
             Add Package
           </Button>
         </Col>
+        <Col>
+          <Button className='action-button' type="primary" onClick={exportData} style={{margin: '20px', justifyContent: 'left', display: 'flex'}}
+          >
+            Export Data
+          </Button>
+        </Col>
       </Row>
-      <div className="ag-theme-alpine" style={{ width: '100%' }}>
+      <div className="grids-theme ag-theme-balham" style={{ height: '100%', width: '100%', padding: '0 20px' }}>
         <AgGridReact
-          rowData={rowData}
+          rowData={filteredData}
           columnDefs={columns}
+          defaultColDef={{ resizable: true }}
           domLayout='autoHeight'
+          rowHeight={40}
+          style={{ borderRadius: '10px', overflow: 'hidden' }}
         />
       </div>
       {isModalOpen && currentPackage && (
