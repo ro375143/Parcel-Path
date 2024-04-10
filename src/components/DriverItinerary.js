@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { db } from "@/app/firebase/config"; // Ensure this is correctly imported
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { List, Tabs } from "antd";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { List, Tabs, Card, Badge, Space, Typography } from "antd";
 import moment from "moment";
 
 const { TabPane } = Tabs;
+const { Text } = Typography;
 
 const DriverItinerary = ({ driverId }) => {
   const [itineraryPackages, setItineraryPackages] = useState([]);
@@ -12,32 +13,25 @@ const DriverItinerary = ({ driverId }) => {
 
   useEffect(() => {
     const fetchDriverPackages = async () => {
-      console.log("Fetching packages for driver ID:", driverId);
       const q = query(
         collection(db, "packages"),
         where("assignedDriverId", "==", driverId)
-        //orderBy("deliveryDate") // Assures oldest delivery dates are first
       );
       const querySnapshot = await getDocs(q);
       const packagesList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-        // Use Moment.js for formatting
         deliveryDate: doc.data().deliveryDate
           ? moment(doc.data().deliveryDate.toDate()).format("MMMM Do YYYY")
           : "No date",
       }));
-      console.log("Fetched packages:", packagesList);
 
-      // Separate packages into itinerary and delivered based on their status
       const itinerary = packagesList.filter(
         (pkg) => pkg.status !== "Delivered"
       );
       const delivered = packagesList.filter(
         (pkg) => pkg.status === "Delivered"
       );
-      console.log("Itinerary packages:", itinerary);
-      console.log("Delivered packages:", delivered);
       setItineraryPackages(itinerary);
       setDeliveredPackages(delivered);
     };
@@ -48,51 +42,63 @@ const DriverItinerary = ({ driverId }) => {
   }, [driverId]);
 
   return (
-    <div>
-      <h2>Driver Itinerary</h2>
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="Itinerary" key="1">
-          {itineraryPackages.length > 0 ? (
-            <List
-              itemLayout="horizontal"
-              dataSource={itineraryPackages}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={item.name}
-                    description={`Delivery Date: ${
-                      item.deliveryDate
-                    } - Status: ${item.status || "Pending"}`}
-                  />
-                  {/* Additional details can be added here */}
-                </List.Item>
-              )}
-            />
-          ) : (
-            <p>No upcoming packages.</p>
-          )}
-        </TabPane>
-        <TabPane tab="Delivered" key="2">
-          {deliveredPackages.length > 0 ? (
-            <List
-              itemLayout="horizontal"
-              dataSource={deliveredPackages}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={item.name}
-                    description={`Delivery Date: ${item.deliveryDate} - Status: Delivered`}
-                  />
-                  {/* Additional details for delivered packages can be added here */}
-                </List.Item>
-              )}
-            />
-          ) : (
-            <p>No delivered packages.</p>
-          )}
-        </TabPane>
-      </Tabs>
-    </div>
+    <Card
+      style={{
+        backgroundColor: "#f0f2f5",
+        margin: "20px",
+        borderRadius: "8px",
+      }}
+    >
+      <Space
+        direction="vertical"
+        size="middle"
+        style={{ display: "flex", width: "100%" }}
+      >
+        <Tabs defaultActiveKey="1" type="card">
+          <TabPane tab="Itinerary" key="1">
+            {itineraryPackages.length > 0 ? (
+              <List
+                itemLayout="vertical"
+                dataSource={itineraryPackages}
+                renderItem={(item) => (
+                  <List.Item>
+                    <Card>
+                      <Text strong>{item.name}</Text>
+                      <p>Delivery Date: {item.deliveryDate}</p>
+                      <Badge
+                        status="processing"
+                        text={`Status: ${item.status || "Pending"}`}
+                      />
+                    </Card>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Text>No upcoming packages.</Text>
+            )}
+          </TabPane>
+          <TabPane tab="Delivered" key="2">
+            {deliveredPackages.length > 0 ? (
+              <List
+                itemLayout="vertical"
+                dataSource={deliveredPackages}
+                renderItem={(item) => (
+                  <List.Item>
+                    <Card>
+                      <Text strong>{item.name}</Text>
+                      <p>Delivery Date: {item.deliveryDate}</p>
+                      <Badge status="success" text="Status: Delivered" />
+                    </Card>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Text>No delivered packages.</Text>
+            )}
+          </TabPane>
+        </Tabs>
+      </Space>
+    </Card>
   );
 };
 
