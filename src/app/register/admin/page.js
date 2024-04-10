@@ -378,7 +378,7 @@ export default function AdminSignUp() {
 
                 <div className="mb-4">
                   <label
-                    htmlFor="email"
+                    htmlFor="zipCode"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Zip Code
@@ -393,11 +393,10 @@ export default function AdminSignUp() {
                     value={zipCode}
                     onChange={(e) => {
                       const formattedValue = e.target.value.replace(/\D/g, "");
-                      if (/^\d{0,5}$/.test(formattedValue)) {
+                      if (formattedValue.length <= 5) {
                         setZipCode(formattedValue);
                         setErrorMessage("");
                       } else {
-                        setErrorMessage("Zip Code must be 5 digits long");
                       }
                     }}
                   />
@@ -405,7 +404,7 @@ export default function AdminSignUp() {
 
                 <div className="mb-4">
                   <label
-                    htmlFor="passwordRetype"
+                    htmlFor="phoneNumber"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Phone Number
@@ -424,13 +423,11 @@ export default function AdminSignUp() {
                           /\D/g,
                           ""
                         );
-                        if (/^\d{0,10}$/.test(formattedValue)) {
+                        if (formattedValue.length <= 10) {
                           setPhoneNumber(formattedValue);
                           setErrorMessage("");
                         } else {
-                          setErrorMessage(
-                            "Phone number must be 10 digits long"
-                          );
+                          setErrorMessage();
                         }
                       }}
                     />
