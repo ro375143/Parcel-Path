@@ -19,6 +19,7 @@ const authLinks = [
 const guestLinks = [
   { name: 'Login', path: '/login' },
   { name: 'Register', path: '/register' },
+  { name: 'Admin', path: '/admin' },
 ];
 
 const Navbar = () => {
