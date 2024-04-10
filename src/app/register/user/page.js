@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "@/app/firebase/config";
 import { doc, setDoc } from "firebase/firestore";
 import { message } from "antd";
+import "../registerpage.css";
 
 export default function CustomerSignUp() {
   const router = useRouter();
@@ -17,6 +18,32 @@ export default function CustomerSignUp() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showRetypePassword, setShowRetypePassword] = useState(false);
+  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isFormsMovedUp, setIsFormsMovedUp] = useState(false);
+
+  function moveFormsUp() {
+    const firstForm = document.querySelector("form");
+    if (firstForm.checkValidity()) {
+      const forms = document.querySelectorAll("form");
+      forms.forEach((form) => form.classList.add("move-up"));
+      setIsFormsMovedUp(true);
+    } else {
+      console.log("Invalid information in the first form.");
+    }
+  }
+
+  function resetForms() {
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+      form.classList.remove("move-up");
+      form.classList.add("resetting");
+    });
+    setIsFormsMovedUp(false);
+  }
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -40,6 +67,13 @@ export default function CustomerSignUp() {
         firstName,
         lastName,
         created_At: creationTimestamp,
+        address: {
+          street: streetAddress,
+          city: city,
+          state: state,
+          zipCode: zipCode,
+        },
+        phoneNumber: phoneNumber,
         role: "customer",
       });
 
@@ -94,10 +128,10 @@ export default function CustomerSignUp() {
 
           <div className="mt-8 overflow-hidden">
             <div
-              className="bg-white py-8 px-6 shadow rounded-lg sm:px-10 overflow-hidden"
-              style={{ height: "612px" }}
+              className="bg-white py-8 px-6 shadow rounded-lg sm:px-10 overflow-hidden form-container"
+              style={{ height: isFormsMovedUp ? "490px" : "640px" }}
             >
-              <form onSubmit={handleSignup} className="overflow-hidden">
+              <form style={{ position: "relative" }}>
                 <div className="mb-4">
                   <label
                     htmlFor="firstName"
@@ -238,10 +272,16 @@ export default function CustomerSignUp() {
 
                 <div>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={moveFormsUp}
                     className="disabled:opacity-40 flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     disabled={
-                      !email || !password || password !== passwordRetype
+                      !firstName ||
+                      !lastName ||
+                      !username ||
+                      !email ||
+                      !password ||
+                      !passwordRetype
                     }
                     style={{
                       backgroundColor: "#345454",
@@ -254,10 +294,9 @@ export default function CustomerSignUp() {
                       (e.target.style.backgroundColor = "#345454")
                     }
                   >
-                    Sign Up
+                    Next
                   </button>
                 </div>
-
                 <div className="mt-6">
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -275,61 +314,65 @@ export default function CustomerSignUp() {
                   </div>
                 </div>
               </form>
-              <form onSubmit={handleSignup} className="">
+              <form
+                onSubmit={handleSignup}
+                className=""
+                style={{ position: "relative", marginTop: "80px" }}
+              >
                 <div className="mb-4">
                   <label
-                    htmlFor="firstName"
+                    htmlFor="streetAddress"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    First Name
+                    Street Address
                   </label>
                   <input
-                    id="firstName"
-                    name="firstName"
+                    id="streetAddress"
+                    name="streetAddress"
                     type="text"
                     autoComplete="given-name"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    value={streetAddress}
+                    onChange={(e) => setStreetAddress(e.target.value)}
                   />
                 </div>
 
                 <div className="mb-4">
                   <label
-                    htmlFor="lastName"
+                    htmlFor="city"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Last Name
+                    City
                   </label>
                   <input
-                    id="lastName"
-                    name="lastName"
+                    id="city"
+                    name="city"
                     type="text"
                     autoComplete="family-name"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                   />
                 </div>
 
                 <div className="mb-4">
                   <label
-                    htmlFor="username"
+                    htmlFor="state"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Username
+                    State
                   </label>
                   <input
-                    id="username"
-                    name="username"
+                    id="state"
+                    name="state"
                     type="text"
-                    autoComplete="username"
+                    autoComplete="state"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
                   />
                 </div>
 
@@ -338,46 +381,26 @@ export default function CustomerSignUp() {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Email
+                    Zip Code
                   </label>
                   <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
+                    id="zipCode"
+                    name="zipCode"
+                    type="text"
+                    autoComplete="zipCode"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={zipCode}
+                    onChange={(e) => {
+                      const formattedValue = e.target.value.replace(/\D/g, "");
+                      if (/^\d{0,5}$/.test(formattedValue)) {
+                        setZipCode(formattedValue);
+                        setErrorMessage("");
+                      } else {
+                        setErrorMessage("Zip Code must be 5 digits long");
+                      }
+                    }}
                   />
-                </div>
-
-                <div className="mb-4">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Password
-                  </label>
-                  <div className="mt-2 relative">
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      required
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
-                  </div>
                 </div>
 
                 <div className="mb-4">
@@ -385,26 +408,32 @@ export default function CustomerSignUp() {
                     htmlFor="passwordRetype"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Confirm Password
+                    Phone Number
                   </label>
                   <div className="mt-2 relative">
                     <input
-                      id="passwordRetype"
-                      name="passwordRetype"
-                      type={showRetypePassword ? "text" : "password"}
-                      autoComplete="new-password"
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      type="text"
+                      autoComplete="phoneNumber"
                       required
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                      value={passwordRetype}
-                      onChange={(e) => setPasswordRetype(e.target.value)}
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        const formattedValue = e.target.value.replace(
+                          /\D/g,
+                          ""
+                        );
+                        if (/^\d{0,10}$/.test(formattedValue)) {
+                          setPhoneNumber(formattedValue);
+                          setErrorMessage("");
+                        } else {
+                          setErrorMessage(
+                            "Phone number must be 10 digits long"
+                          );
+                        }
+                      }}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowRetypePassword(!showRetypePassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                    >
-                      {showRetypePassword ? "Hide" : "Show"}
-                    </button>
                   </div>
                 </div>
 
@@ -414,12 +443,33 @@ export default function CustomerSignUp() {
                   </p>
                 )}
 
-                <div>
+                <div className="flex">
+                  <button
+                    type="button"
+                    onClick={resetForms}
+                    className="flex mr-2 w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{
+                      backgroundColor: "#345454",
+                      transition: "background-color 0.3s",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.target.style.backgroundColor = "#a4d7bb")
+                    }
+                    onMouseOut={(e) =>
+                      (e.target.style.backgroundColor = "#345454")
+                    }
+                  >
+                    Back
+                  </button>
                   <button
                     type="submit"
                     className="disabled:opacity-40 flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     disabled={
-                      !email || !password || password !== passwordRetype
+                      !streetAddress ||
+                      !city ||
+                      !state ||
+                      !zipCode ||
+                      !phoneNumber
                     }
                     style={{
                       backgroundColor: "#345454",
@@ -434,23 +484,6 @@ export default function CustomerSignUp() {
                   >
                     Sign Up
                   </button>
-                </div>
-
-                <div className="mt-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-3 gap-3">
-                    {/* Social sign-up options, if any */}
-                  </div>
                 </div>
               </form>
             </div>
