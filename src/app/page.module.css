@@ -61,3 +61,16 @@
   background-color: #154734; /* Dark green */
   color: #ffffff; /* White */
 }
+
+.dashboardContainer {
+  padding-top: 70px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.pageTitle {
+  font-size: 32px; /* Adjust the size as you like */
+  font-weight: bold;
+  text-align: center; /* Center align if desired */
+  margin: 20px 0; /* Add some space around the title */
+}

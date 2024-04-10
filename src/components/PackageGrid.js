@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import styles from "./PackageGrid.module.css";
 import { db } from "@/app/firebase/config";
 import {
   collection,
@@ -18,9 +19,8 @@ import { Button, Input, Row, Col, Modal } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { Timestamp } from "firebase/firestore";
-import './grids.css';
-import { saveAs } from 'file-saver';
-import { json2csv } from 'json-2-csv';
+import { saveAs } from "file-saver";
+import { json2csv } from "json-2-csv";
 import moment from "moment";
 import AdminAssignPackage from "./AdminAssignPackage";
 
@@ -29,18 +29,56 @@ const PackagesGrid = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentPackage, setCurrentPackage] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // New state for create modal visibility
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  
 
   const columns = [
-    { headerName: "ID", field: "id", flex: 1 },
-    { headerName: "Package Name", field: "name", flex: 1 },
-    { headerName: "Description", field: "description", flex: 1 },
-    { headerName: "Status", field: "status", flex: 1 },
-    { headerName: "Tracking Number", field: "trackingNumber", flex: 1 },
-    { headerName: "Package Weight", field: "packageWeight", flex: 1 },
-    { headerName: "Package Dimensions", field: "packageDimensions", flex: 1 },
+    { headerName: "ID", field: "id", flex: 1, minWidth: 100, maxWidth: 300 },
+    {
+      headerName: "Package Name",
+      field: "name",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
+    },
+    {
+      headerName: "Description",
+      field: "description",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
+    },
+    {
+      headerName: "Status",
+      field: "status",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
+    },
+    {
+      headerName: "Tracking Number",
+      field: "trackingNumber",
+      flex: 1,
+      minWidth: 200,
+      maxWidth: 300,
+      pinned: "left",
+      lockedPinned: true,
+      suppressMovable: true,
+    },
+    {
+      headerName: "Package Weight",
+      field: "packageWeight",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
+    },
+    {
+      headerName: "Package Dimensions",
+      field: "packageDimensions",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
+    },
     {
       headerName: "Ship Date",
       field: "shipDate",
@@ -49,6 +87,8 @@ const PackagesGrid = () => {
         return date ? dayjs(date).format("MM-DD-YYYY") : ""; // Using dayjs for formatting
       },
       flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
     },
     {
       headerName: "Delivery Date",
@@ -58,6 +98,8 @@ const PackagesGrid = () => {
         return date ? dayjs(date).format("MM-DD-YYYY") : "";
       },
       flex: 1,
+      minWidth: 100,
+      maxWidth: 300,
     },
 
     {
@@ -71,6 +113,11 @@ const PackagesGrid = () => {
         />
       ),
       flex: 1,
+      minWidth: 210,
+      maxWidth: 210,
+      pinned: "right",
+      lockedPinned: true,
+      suppressMovable: true,
     },
   ];
 
@@ -170,18 +217,26 @@ const PackagesGrid = () => {
     if (value) {
       const filtered = rowData.filter((row) => {
         return Object.keys(row).some((field) => {
-          return row[field].toString().toLowerCase().includes(value.toLowerCase());
+          // Check if the field is not null or undefined before calling toString
+          return (
+            row[field] !== null &&
+            row[field] !== undefined &&
+            row[field].toString().toLowerCase().includes(value.toLowerCase())
+          );
         });
       });
       setFilteredData(filtered);
     } else {
       setFilteredData(rowData);
     }
-  }
+  };
 
-  const exportData  = async () => {
+  const exportData = async () => {
     const querySnapshot = await getDocs(collection(db, "packages"));
-    const packagesArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const packagesArray = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
     const csvData = packagesArray.map((item) => {
       return {
         id: item.id,
@@ -192,48 +247,61 @@ const PackagesGrid = () => {
         trackingNumber: item.trackingNumber,
         packageWeight: item.packageWeight,
         packageDimensions: item.packageDimensions,
-        shipDate: item.shipDate?.toDate ? moment(item.shipDate.toDate()).format("MM-DD-YYYY") : '',
-        deliveryDate: item.deliveryDate?.toDate ? moment(item.deliveryDate.toDate()).format("MM-DD-YYYY") : '',
+        shipDate: item.shipDate?.toDate
+          ? moment(item.shipDate.toDate()).format("MM-DD-YYYY")
+          : "",
+        deliveryDate: item.deliveryDate?.toDate
+          ? moment(item.deliveryDate.toDate()).format("MM-DD-YYYY")
+          : "",
       };
-    }
-    );
+    });
     const csv = await json2csv(csvData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, 'packages.csv');
-  }
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, "packages.csv");
+  };
 
   return (
-    <div>
+    <div className={`ag-theme-alpine ${styles.gridContainer}`}>
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col>
-        <Input.Search className='search-input' placeholder="Search packages..." onSearch={handleSearch} value={searchValue} onChange={(e) => handleSearch(e.target.value)} />
+          <Input.Search
+            className="search-input"
+            placeholder="Search packages..."
+            onSearch={handleSearch}
+            value={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
         </Col>
         <Col>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={openCreateModal}
+            className={styles.actionButton}
           >
             Add Package
           </Button>
         </Col>
         <Col>
-          <Button className='action-button' type="primary" onClick={exportData} style={{margin: '20px', justifyContent: 'left', display: 'flex'}}
+          <Button
+            className={styles.actionButton}
+            type="primary"
+            onClick={exportData}
           >
             Export Data
           </Button>
         </Col>
         <Col>
-          <AdminAssignPackage />
+          <AdminAssignPackage className={styles.actionButton} />
         </Col>
       </Row>
-      <div className="ag-theme-alpine" style={{ width: "100%" }}>
+      <div>
         <AgGridReact
           rowData={filteredData}
           columnDefs={columns}
           domLayout="autoHeight"
           rowHeight={40}
-          style={{ borderRadius: '10px', overflow: 'hidden' }}
+          style={{ borderRadius: "10px", overflow: "hidden" }}
         />
       </div>
       {isEditModalOpen && currentPackage && (

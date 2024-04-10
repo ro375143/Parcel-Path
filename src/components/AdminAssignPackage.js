@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db } from "@/app/firebase/config"; // Adjust this import based on your actual Firebase config file
+import { db } from "@/app/firebase/config";
 import {
   collection,
   query,
@@ -8,12 +8,14 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
+import { Modal, Select, Button } from "antd";
 
 export default function AdminAssignPackage() {
   const [drivers, setDrivers] = useState([]);
   const [packages, setPackages] = useState([]);
-  const [selectedDriver, setSelectedDriver] = useState("");
-  const [selectedPackage, setSelectedPackage] = useState("");
+  const [selectedDriver, setSelectedDriver] = useState(undefined);
+  const [selectedPackage, setSelectedPackage] = useState(undefined);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   // Fetch unassigned packages
   const fetchPackages = async () => {
@@ -22,11 +24,9 @@ export default function AdminAssignPackage() {
       where("assignedDriverId", "==", null)
     );
     const querySnapshot = await getDocs(q);
-    const packagesList = querySnapshot.docs.map((doc) => ({
-      id: doc.id, // Document ID
-      ...doc.data(), // Document data
-    }));
-    setPackages(packagesList);
+    setPackages(
+      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    );
   };
 
   useEffect(() => {
@@ -34,11 +34,9 @@ export default function AdminAssignPackage() {
     const fetchDrivers = async () => {
       const q = query(collection(db, "users"), where("role", "==", "driver"));
       const querySnapshot = await getDocs(q);
-      const driversList = querySnapshot.docs.map((doc) => ({
-        id: doc.id, // Document ID
-        ...doc.data(), // Document data, including username
-      }));
-      setDrivers(driversList);
+      setDrivers(
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      );
     };
 
     fetchDrivers();
@@ -47,7 +45,7 @@ export default function AdminAssignPackage() {
 
   const handleAssignPackage = async () => {
     if (!selectedDriver || !selectedPackage) {
-      alert("Please select both a driver and a package."); // Simple validation feedback
+      alert("Please select both a driver and a package."); // Consider using Ant Design's notification for feedback
       return;
     }
     try {
@@ -55,42 +53,63 @@ export default function AdminAssignPackage() {
         assignedDriverId: selectedDriver,
         driverAssigned: true,
       });
-      alert("Package assigned successfully!"); // Success feedback
+      alert("Package assigned successfully!"); // Consider using Ant Design's notification for feedback
       await fetchPackages(); // Refresh the packages list
-      setSelectedDriver(""); // Reset selected driver dropdown
-      setSelectedPackage(""); // Reset selected package dropdown
+      setSelectedDriver(undefined); // Reset selected driver dropdown
+      setSelectedPackage(undefined); // Reset selected package dropdown
+      setIsModalVisible(false); // Close the modal
     } catch (error) {
       console.error("Error assigning package:", error);
-      alert("Failed to assign package."); // Error feedback
+      alert("Failed to assign package."); // Consider using Ant Design's notification for feedback
     }
   };
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
   return (
-    <div>
-      <h2>Assign Package to Driver</h2>
-      <select
-        onChange={(e) => setSelectedDriver(e.target.value)}
-        value={selectedDriver}
+    <>
+      <Button type="primary" onClick={showModal}>
+        Assign Package to Driver
+      </Button>
+      <Modal
+        title="Assign Package to Driver"
+        visible={isModalVisible}
+        onOk={handleAssignPackage}
+        onCancel={handleCancel}
+        okText="Assign"
+        cancelText="Cancel"
       >
-        <option value="">Select Driver</option>
-        {drivers.map((driver) => (
-          <option key={driver.id} value={driver.id}>
-            {driver.username || "Unnamed Driver"}
-          </option>
-        ))}
-      </select>
-      <select
-        onChange={(e) => setSelectedPackage(e.target.value)}
-        value={selectedPackage}
-      >
-        <option value="">Select Package</option>
-        {packages.map((packageItem) => (
-          <option key={packageItem.id} value={packageItem.id}>
-            {packageItem.name || "Unnamed Package"}
-          </option>
-        ))}
-      </select>
-      <button onClick={handleAssignPackage}>Assign Package</button>
-    </div>
+        <Select
+          placeholder="Select Driver"
+          onChange={(value) => setSelectedDriver(value)}
+          value={selectedDriver}
+          style={{ width: "100%", marginBottom: "1rem" }}
+        >
+          {drivers.map((driver) => (
+            <Select.Option key={driver.id} value={driver.id}>
+              {driver.username || "Unnamed Driver"}
+            </Select.Option>
+          ))}
+        </Select>
+        <Select
+          placeholder="Select Package"
+          onChange={(value) => setSelectedPackage(value)}
+          value={selectedPackage}
+          style={{ width: "100%" }}
+        >
+          {packages.map((packageItem) => (
+            <Select.Option key={packageItem.id} value={packageItem.id}>
+              {packageItem.name || "Unnamed Package"}
+            </Select.Option>
+          ))}
+        </Select>
+      </Modal>
+    </>
   );
 }
