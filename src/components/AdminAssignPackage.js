@@ -18,18 +18,18 @@ export default function AdminAssignPackage() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   // Fetch unassigned packages
-  const fetchPackages = async () => {
-    const q = query(
-      collection(db, "packages"),
-      where("assignedDriverId", "==", null)
-    );
-    const querySnapshot = await getDocs(q);
-    setPackages(
-      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    );
-  };
 
   useEffect(() => {
+    const fetchPackages = async () => {
+      const q = query(
+        collection(db, "packages"),
+        where("assignedDriverId", "==", null)
+      );
+      const querySnapshot = await getDocs(q);
+      setPackages(
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      );
+    };
     // Fetch drivers with role "driver"
     const fetchDrivers = async () => {
       const q = query(collection(db, "users"), where("role", "==", "driver"));
