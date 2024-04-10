@@ -1,5 +1,4 @@
 "use client";
-"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth"; // Make sure to import signOut

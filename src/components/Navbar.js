@@ -13,31 +13,36 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [uid, setUid] = useState(null);
+  const [loading, setLoading] = useState(true); // Add a loading state
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true); // Begin loading
       if (user) {
         setIsAuthenticated(true);
-        const uid = user.uid; // Use the full UID
-        setUid(uid);
-
-        // Fetch the user role from the 'users' collection
-        const userDocRef = doc(db, "users", uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists() && docSnap.data().role) {
-          setUserRole(docSnap.data().role); // Set the user role based on document
-        } else {
-          console.error("User document does not exist or role is missing.");
-          setIsAuthenticated(false); // Optionally handle as unauthenticated
+        setUid(user.uid);
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(userDocRef);
+          if (docSnap.exists() && docSnap.data().role) {
+            setUserRole(docSnap.data().role);
+          } else {
+            console.error("User document does not exist or role is missing.");
+            setIsAuthenticated(false);
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
         }
+        setLoading(false); // End loading after fetching role
       } else {
         setIsAuthenticated(false);
         setUserRole(null);
         setUid(null);
+        setLoading(false); // End loading after fetching role
+
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -53,6 +58,11 @@ const Navbar = () => {
       console.error("Logout Error", error);
     }
   };
+
+  if (loading) {
+    // Return a loading indicator, or null if you prefer not to show anything
+    return <div className={styles.loadingContainer}>Loading...</div>;
+  }
 
   const roleBasedLinks = {
     customer: [
@@ -99,7 +109,12 @@ const Navbar = () => {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const getLinksForRole = () => {
+    if (loading) return []; // Optionally, handle loading state separately
     if (!isAuthenticated) return unauthenticatedLinks;
+    if (!userRole) {
+      console.error("User role not yet loaded or undefined.");
+      return [];
+  }
     const roleLinks = roleBasedLinks[userRole];
     if (!roleLinks) {
       console.error("Unrecognized role or role not yet loaded:", userRole);
