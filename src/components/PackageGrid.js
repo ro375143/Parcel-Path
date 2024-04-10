@@ -149,12 +149,19 @@ const PackagesGrid = () => {
   }, []);
 
   const fetchPackages = async () => {
-    const querySnapshot = await getDocs(collection(db, "packages"));
-    const packagesArray = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setRowData(packagesArray);
+    console.log("Fetching packages...");
+    try {
+      const querySnapshot = await getDocs(collection(db, "packages"));
+      const packagesArray = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log("Packages fetched:", packagesArray);
+      setRowData(packagesArray);
+      setFilteredData(packagesArray); // Make sure to set filteredData as well
+    } catch (error) {
+      console.error("Error fetching packages:", error);
+    }
   };
 
   const handleSearch = (value) => {
