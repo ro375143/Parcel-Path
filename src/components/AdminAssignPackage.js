@@ -15,6 +15,20 @@ export default function AdminAssignPackage() {
   const [selectedDriver, setSelectedDriver] = useState("");
   const [selectedPackage, setSelectedPackage] = useState("");
 
+  // Fetch unassigned packages
+  const fetchPackages = async () => {
+    const q = query(
+      collection(db, "packages"),
+      where("assignedDriverId", "==", null)
+    );
+    const querySnapshot = await getDocs(q);
+    const packagesList = querySnapshot.docs.map((doc) => ({
+      id: doc.id, // Document ID
+      ...doc.data(), // Document data
+    }));
+    setPackages(packagesList);
+  };
+
   useEffect(() => {
     // Fetch drivers with role "driver"
     const fetchDrivers = async () => {
@@ -27,32 +41,28 @@ export default function AdminAssignPackage() {
       setDrivers(driversList);
     };
 
-    // Fetch unassigned packages
-    const fetchPackages = async () => {
-      const q = query(
-        collection(db, "packages"),
-        where("assignedDriverId", "==", null)
-      );
-      const querySnapshot = await getDocs(q);
-      const packagesList = querySnapshot.docs.map((doc) => ({
-        id: doc.id, // Document ID
-        ...doc.data(), // Document data
-      }));
-      setPackages(packagesList);
-    };
-
     fetchDrivers();
     fetchPackages();
   }, []);
 
   const handleAssignPackage = async () => {
-    if (!selectedDriver || !selectedPackage) return;
-    // Update the selected package with the selected driver's ID
-    await updateDoc(doc(db, "packages", selectedPackage), {
-      assignedDriverId: selectedDriver,
-    });
-    // Optionally, refresh the list of packages
-    fetchPackages();
+    if (!selectedDriver || !selectedPackage) {
+      alert("Please select both a driver and a package."); // Simple validation feedback
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "packages", selectedPackage), {
+        assignedDriverId: selectedDriver,
+        driverAssigned: true,
+      });
+      alert("Package assigned successfully!"); // Success feedback
+      await fetchPackages(); // Refresh the packages list
+      setSelectedDriver(""); // Reset selected driver dropdown
+      setSelectedPackage(""); // Reset selected package dropdown
+    } catch (error) {
+      console.error("Error assigning package:", error);
+      alert("Failed to assign package."); // Error feedback
+    }
   };
 
   return (
