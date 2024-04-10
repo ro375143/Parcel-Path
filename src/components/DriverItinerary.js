@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db } from "@/app/firebase/config";
 import {
   collection,
@@ -18,9 +18,10 @@ import {
   Typography,
   Button,
   Modal,
+  message,
 } from "antd";
 import moment from "moment";
-import { QRScanner, Scanner } from "@yudiel/react-qr-scanner";
+import { Scanner } from "@yudiel/react-qr-scanner";
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
@@ -29,6 +30,8 @@ const DriverItinerary = ({ driverId }) => {
   const [itineraryPackages, setItineraryPackages] = useState([]);
   const [deliveredPackages, setDeliveredPackages] = useState([]);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scanProcessed, setScanProcessed] = useState(false);
+  const scannerRef = useRef(null);
 
   useEffect(() => {
     fetchDriverPackages();
@@ -55,23 +58,44 @@ const DriverItinerary = ({ driverId }) => {
   };
 
   const handleScan = async (data) => {
-    if (data) {
+    if (data && !scanProcessed) {
       const scannedPackage = itineraryPackages.find(
         (pkg) => pkg.trackingNumber === data
       );
       if (scannedPackage) {
+        setScanProcessed(true); // Prevent further scans from being processed
         await updateDoc(doc(db, "packages", scannedPackage.id), {
           status: "Delivered",
         });
-        fetchDriverPackages();
-        setIsScannerOpen(false);
-        alert(`Package ${scannedPackage.name} delivered!`);
+        message.success(`Package ${scannedPackage.name} delivered!`);
+        setIsScannerOpen(false); // Close scanner modal
+        fetchDriverPackages(); // Refresh package lists
+
+        // Attempt to stop scanning
+        if (scannerRef.current) {
+          scannerRef.current.stopScanning();
+        }
+      } else {
+        message.error("Package not found in itinerary.");
       }
     }
   };
 
-  const handleError = (err) => {
-    console.error(err);
+  const handleOpenScanner = () => {
+    setIsScannerOpen(true);
+    setScanProcessed(false); // Allow scanning again
+  };
+
+  const handleCloseScanner = () => {
+    setIsScannerOpen(false); // Close the scanner modal
+    message.destroy(); // Clear all messages
+    setScanProcessed(false); // Reset scan processed state if you're implementing the previous suggestion
+  };
+
+  const handleCancelScanner = () => {
+    setIsScannerOpen(false); // Close the scanner modal
+    message.destroy(); // Clear all messages
+    setScanProcessed(false); // Reset scan processed state if you're implementing the previous suggestion
   };
 
   return (
@@ -89,24 +113,26 @@ const DriverItinerary = ({ driverId }) => {
       >
         <Tabs defaultActiveKey="1" type="card">
           <TabPane tab="Itinerary" key="1">
-            <Button type="primary" onClick={() => setIsScannerOpen(true)}>
+            <Button type="primary" onClick={handleOpenScanner}>
               Scan QR Code
             </Button>
+
             {isScannerOpen && (
               <Modal
                 title="Scan QR Code"
                 visible={isScannerOpen}
-                onOk={() => setIsScannerOpen(false)}
-                onCancel={() => setIsScannerOpen(false)}
+                onOk={handleCloseScanner}
+                onCancel={handleCancelScanner}
                 footer={null}
               >
                 <Scanner
+                  ref={scannerRef}
                   onResult={(result, error) => {
                     if (!!result) {
-                      handleScan(result?.text);
+                      handleScan(result);
                     }
                     if (!!error) {
-                      console.info(error);
+                      console.error(error);
                     }
                   }}
                   style={{ width: "100%" }}
@@ -123,7 +149,7 @@ const DriverItinerary = ({ driverId }) => {
                       <Text strong>{item.name}</Text>
                       <p>Delivery Date: {item.deliveryDate}</p>
                       <p>
-                        Ship Date:{" "}
+                        Ship Date:
                         {item.shipDate
                           ? moment(item.shipDate.toDate()).format(
                               "MMMM Do YYYY"
@@ -153,9 +179,8 @@ const DriverItinerary = ({ driverId }) => {
                     <Card>
                       <Text strong>{item.name}</Text>
                       <p>Delivery Date: {item.deliveryDate}</p>
-                      {/* Display ship date and tracking number for delivered packages */}
                       <p>
-                        Ship Date:{" "}
+                        Ship Date:
                         {item.shipDate
                           ? moment(item.shipDate.toDate()).format(
                               "MMMM Do YYYY"
