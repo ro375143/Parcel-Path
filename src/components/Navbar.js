@@ -6,6 +6,7 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/app/firebase/config";
 import { useRouter } from "next/navigation"; // Assuming next/navigation is correct for your setup
 import { doc, getDoc } from "firebase/firestore";
+import { message } from "antd";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,10 +44,11 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push("/login");
+      message.success("Sign Out Successful!", 10); // Display the success message
       setIsAuthenticated(false);
       setUserRole(null);
       setUid(null);
+      router.push("/login"); // Redirect to the login page
     } catch (error) {
       console.error("Logout Error", error);
     }
