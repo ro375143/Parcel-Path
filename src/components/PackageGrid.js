@@ -22,6 +22,7 @@ import './grids.css';
 import { saveAs } from 'file-saver';
 import { json2csv } from 'json-2-csv';
 import moment from "moment";
+import AdminAssignPackage from "./AdminAssignPackage";
 
 const PackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -221,6 +222,9 @@ const PackagesGrid = () => {
           >
             Export Data
           </Button>
+        </Col>
+        <Col>
+          <AdminAssignPackage />
         </Col>
       </Row>
       <div className="ag-theme-alpine" style={{ width: "100%" }}>
