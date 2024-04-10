@@ -16,7 +16,7 @@ import CreatePackageModal from "./CreatePackage";
 import ButtonRenderer from "./ButtonRenderer";
 import { Button, Input, Row, Col, Modal } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import moment from "moment";
+import dayjs from "dayjs";
 import { Timestamp } from "firebase/firestore";
 
 const PackagesGrid = () => {
@@ -30,7 +30,6 @@ const PackagesGrid = () => {
     { headerName: "Package Name", field: "name", flex: 1 },
     { headerName: "Description", field: "description", flex: 1 },
     { headerName: "Status", field: "status", flex: 1 },
-    { headerName: "Customer Id", field: "customerId", flex: 1 },
     { headerName: "Tracking Number", field: "trackingNumber", flex: 1 },
     { headerName: "Package Weight", field: "packageWeight", flex: 1 },
     { headerName: "Package Dimensions", field: "packageDimensions", flex: 1 },
@@ -39,7 +38,7 @@ const PackagesGrid = () => {
       field: "shipDate",
       cellRenderer: (params) => {
         const date = params.value?.toDate ? params.value.toDate() : null;
-        return date ? moment(date).format("MM-DD-YYYY") : ""; // using moment for formatting
+        return date ? dayjs(date).format("MM-DD-YYYY") : ""; // Using dayjs for formatting
       },
       flex: 1,
     },
@@ -48,7 +47,7 @@ const PackagesGrid = () => {
       field: "deliveryDate",
       cellRenderer: (params) => {
         const date = params.value?.toDate ? params.value.toDate() : null;
-        return date ? moment(date).format("MM-DD-YYYY") : "";
+        return date ? dayjs(date).format("MM-DD-YYYY") : "";
       },
       flex: 1,
     },

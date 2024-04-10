@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Modal, Form, Input, Select, DatePicker, InputNumber } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
+
 
 const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
   const [form] = Form.useForm();
@@ -11,7 +12,6 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         name: packageData.name,
         description: packageData.description,
         status: packageData.status,
-        // trackingNumber is now auto-generated, no need to edit
         trackingNumber: packageData.trackingNumber,
         packageWeight: packageData.packageWeight
           ? packageData.packageWeight
@@ -20,10 +20,10 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
           ? packageData.packageDimensions
           : "",
         shipDate: packageData.shipDate
-          ? moment(packageData.shipDate.toDate())
+          ? dayjs(packageData.shipDate.toDate())
           : null,
         deliveryDate: packageData.deliveryDate
-          ? moment(packageData.deliveryDate.toDate())
+          ? dayjs(packageData.deliveryDate.toDate())
           : null,
       });
     }
@@ -33,7 +33,6 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
     form
       .validateFields()
       .then((values) => {
-        // Don't save trackingNumber from form values since it's auto-generated
         const { trackingNumber, ...valuesToSave } = values;
         onSave(packageData.id, valuesToSave);
         onClose();
