@@ -1,0 +1,25 @@
+@keyframes moveUp {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-590px);
+    }
+}
+
+.resetting {
+    transform: translateY(590);
+    height: 600px;
+    transition: transform 0.5s, height 0.5s;
+}
+
+.move-up {
+    transform: translateY(-605px);
+    height: 512px;
+    transition: transform 0.5s, height 0.5s;
+
+}
+.form-container {
+    transition: height 0.3s ease;
+
+}
