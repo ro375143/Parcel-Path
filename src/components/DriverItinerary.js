@@ -65,6 +65,15 @@ const DriverItinerary = ({ driverId }) => {
                     <Card>
                       <Text strong>{item.name}</Text>
                       <p>Delivery Date: {item.deliveryDate}</p>
+                      <p>
+                        Ship Date:{" "}
+                        {item.shipDate
+                          ? moment(item.shipDate.toDate()).format(
+                              "MMMM Do YYYY"
+                            )
+                          : "No date"}
+                      </p>
+                      <p>Tracking Number: {item.trackingNumber}</p>
                       <Badge
                         status="processing"
                         text={`Status: ${item.status || "Pending"}`}
@@ -77,6 +86,7 @@ const DriverItinerary = ({ driverId }) => {
               <Text>No upcoming packages.</Text>
             )}
           </TabPane>
+
           <TabPane tab="Delivered" key="2">
             {deliveredPackages.length > 0 ? (
               <List
@@ -87,6 +97,16 @@ const DriverItinerary = ({ driverId }) => {
                     <Card>
                       <Text strong>{item.name}</Text>
                       <p>Delivery Date: {item.deliveryDate}</p>
+                      {/* Display ship date and tracking number for delivered packages */}
+                      <p>
+                        Ship Date:{" "}
+                        {item.shipDate
+                          ? moment(item.shipDate.toDate()).format(
+                              "MMMM Do YYYY"
+                            )
+                          : "No date"}
+                      </p>
+                      <p>Tracking Number: {item.trackingNumber}</p>
                       <Badge status="success" text="Status: Delivered" />
                     </Card>
                   </List.Item>

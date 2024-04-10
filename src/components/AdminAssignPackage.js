@@ -8,7 +8,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { Modal, Select, Button } from "antd";
+import { Modal, Select, Button, message } from "antd"; // Import the message component
 
 export default function AdminAssignPackage() {
   const [drivers, setDrivers] = useState([]);
@@ -17,35 +17,33 @@ export default function AdminAssignPackage() {
   const [selectedPackage, setSelectedPackage] = useState(undefined);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Fetch unassigned packages
+  const fetchDrivers = async () => {
+    const q = query(collection(db, "users"), where("role", "==", "driver"));
+    const querySnapshot = await getDocs(q);
+    setDrivers(
+      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    );
+  };
+
+  const fetchPackages = async () => {
+    const q = query(
+      collection(db, "packages"),
+      where("assignedDriverId", "==", null)
+    );
+    const querySnapshot = await getDocs(q);
+    setPackages(
+      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    );
+  };
 
   useEffect(() => {
-    const fetchPackages = async () => {
-      const q = query(
-        collection(db, "packages"),
-        where("assignedDriverId", "==", null)
-      );
-      const querySnapshot = await getDocs(q);
-      setPackages(
-        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      );
-    };
-    // Fetch drivers with role "driver"
-    const fetchDrivers = async () => {
-      const q = query(collection(db, "users"), where("role", "==", "driver"));
-      const querySnapshot = await getDocs(q);
-      setDrivers(
-        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      );
-    };
-
     fetchDrivers();
     fetchPackages();
-  }, []);
+  }, [fetchDrivers, fetchPackages]);
 
   const handleAssignPackage = async () => {
     if (!selectedDriver || !selectedPackage) {
-      alert("Please select both a driver and a package."); // Consider using Ant Design's notification for feedback
+      message.error("Please select both a driver and a package."); // Using Ant Design's message for feedback
       return;
     }
     try {
@@ -53,14 +51,14 @@ export default function AdminAssignPackage() {
         assignedDriverId: selectedDriver,
         driverAssigned: true,
       });
-      alert("Package assigned successfully!"); // Consider using Ant Design's notification for feedback
+      message.success("Package assigned successfully!"); // Using Ant Design's message for success feedback
       await fetchPackages(); // Refresh the packages list
       setSelectedDriver(undefined); // Reset selected driver dropdown
       setSelectedPackage(undefined); // Reset selected package dropdown
       setIsModalVisible(false); // Close the modal
     } catch (error) {
       console.error("Error assigning package:", error);
-      alert("Failed to assign package."); // Consider using Ant Design's notification for feedback
+      message.error("Failed to assign package."); // Using Ant Design's message for error feedback
     }
   };
 
