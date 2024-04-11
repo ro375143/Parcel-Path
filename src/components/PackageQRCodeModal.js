@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebase/config"; // Adjust this import based on your file structure
-import { Modal, Select } from "antd";
+import { Modal, Button, List } from "antd";
 import QRCode from "qrcode.react";
-
-const { Option } = Select;
 
 const PackageQRCodeModal = () => {
   const [packages, setPackages] = useState([]);
@@ -24,38 +22,50 @@ const PackageQRCodeModal = () => {
     fetchPackages();
   }, []);
 
-  const handleSelectChange = (value) => {
-    setSelectedPackage(packages.find((pkg) => pkg.id === value));
+  const handleOpenModal = () => {
     setIsModalVisible(true);
   };
 
-  const handleCloseModal = () => setIsModalVisible(false);
+  const handleSelectPackage = (pkg) => {
+    setSelectedPackage(pkg);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedPackage(null); // Reset selected package on modal close
+  };
 
   return (
     <div>
-      <Select
-        showSearch
-        style={{ width: 200 }}
-        placeholder="Select a package"
-        optionFilterProp="children"
-        onChange={handleSelectChange}
-        filterOption={(input, option) =>
-          option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-        }
-      >
-        {packages.map((pkg) => (
-          <Option key={pkg.id} value={pkg.id}>
-            {pkg.name}
-          </Option>
-        ))}
-      </Select>
+      <Button type="primary" onClick={handleOpenModal}>
+        Select Package
+      </Button>
       <Modal
-        title="Package QR Code"
+        title={selectedPackage ? "Package QR Code" : "Select a Package"}
         visible={isModalVisible}
         onOk={handleCloseModal}
         onCancel={handleCloseModal}
+        footer={null}
       >
-        {selectedPackage && <QRCode value={selectedPackage.trackingNumber} />}
+        {selectedPackage ? (
+          <QRCode value={selectedPackage.trackingNumber} />
+        ) : (
+          <List
+            dataSource={packages}
+            renderItem={(pkg) => (
+              <List.Item
+                key={pkg.id}
+                actions={[
+                  <Button key="select" onClick={() => handleSelectPackage(pkg)}>
+                    Select
+                  </Button>,
+                ]}
+              >
+                {pkg.name}
+              </List.Item>
+            )}
+          />
+        )}
       </Modal>
     </div>
   );
