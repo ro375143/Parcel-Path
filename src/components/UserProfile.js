@@ -44,7 +44,10 @@ const UserProfile = () => {
         setUserInfo({
           firstName: data.firstName,
           lastName: data.lastName,
-          address: data.address,
+          city: data.city,
+          state: data.state,
+          street: data.street,
+          zipCode: data.zipCode,
           email: auth.currentUser.email,
           type: collectionsName[i],
           phone: data.phoneNo,
@@ -59,7 +62,11 @@ const UserProfile = () => {
       form.setFieldsValue({
         firstName: userInfo.firstName,
         lastName: userInfo.lastName,
-        address: userInfo.address,
+        address: userInfo.street + ", " + userInfo.city +  ", " + userInfo.state + ", " + userInfo.zipCode, //createAddressString(userInfo.st, userInfo.city, userInfo.state, userInfo.zipCode),
+        city: userInfo.city,
+        state: userInfo.state, 
+        street: userInfo.street,
+        zipCode: userInfo.zipCode,
         email: userInfo.email,
         type: userInfo.type,
         phone: userInfo.phone,
@@ -77,7 +84,10 @@ const UserProfile = () => {
     await updateDoc(doc(db, userInfo.type, auth.currentUser.uid), {
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
-      address: userInfo.address,
+      city: userInfo.city,
+      state: userInfo.state, 
+      street: userInfo.street,
+      zipCode: userInfo.zipCode,
       phoneNo: userInfo.phone,
     });
   };
@@ -89,10 +99,6 @@ const UserProfile = () => {
 
   function handleLastNameChange(ev) {
     setUserInfo({ ...userInfo, lastName: ev.target.value });
-  }
-
-  function handleAddressChange(ev) {
-    setUserInfo({ ...userInfo, address: ev.target.value });
   }
 
   function handlePhoneChange(ev) {
@@ -146,13 +152,46 @@ const UserProfile = () => {
         >
           <Input disabled={true} />
         </Form.Item>
-        <Form.Item
+        {inputEnabled? (
+          <Form.Item
           name="address"
           label="Address"
           rules={[{ required: true, message: "Please input your address!" }]}
         >
-          <Input disabled={inputEnabled} onChange={handleAddressChange} />
+          <Input disabled={inputEnabled} />
         </Form.Item>
+        ): (
+          <>
+          <Form.Item
+            name="city"
+            label="City"
+            rules={[{ required: true, message: "Please input your City!" }]}
+          >
+            <Input onChange={(ev) => {setUserInfo({ ...userInfo, city: ev.target.value })}} />
+          </Form.Item>
+          <Form.Item
+            name="state"
+            label="State"
+            rules={[{ required: true, message: "Please input your State!" }]}
+          >
+            <Input onChange={(ev) => {setUserInfo({ ...userInfo, state: ev.target.value })}} />
+          </Form.Item>
+          <Form.Item
+            name="street"
+            label="Street"
+            rules={[{ required: true, message: "Please input your Street!" }]}
+          >
+            <Input onChange={(ev) => {setUserInfo({ ...userInfo, street: ev.target.value })}} />
+          </Form.Item>
+          <Form.Item
+            name="zipCode"
+            label="Zip Code"
+            rules={[{ required: true, message: "Please input your ZipCode!" }]}
+          >
+            <Input onChange={(ev) => {setUserInfo({ ...userInfo, zipCode: ev.target.value })}} />
+          </Form.Item>
+        </>
+        )}
         <Form.Item
           name="type"
           label="Type"
@@ -169,7 +208,7 @@ const UserProfile = () => {
           <Input disabled={inputEnabled} onChange={handlePhoneChange} />
         </Form.Item>
         {inputEnabled ? (
-          <Button onClick={editUser} disabled={!inputEnabled}>
+          <Button onClick={editUser} disabled={!inputEnabled} class>
             Edit User
           </Button>
         ) : (
@@ -189,7 +228,3 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
-
-
-
-
