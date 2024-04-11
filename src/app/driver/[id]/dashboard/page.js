@@ -47,7 +47,7 @@ const DriversPage = () => {
 
   return (
     <div>
-      <h1 className={styles.pageTitle}>Admin Dashboard</h1>
+      <h1 className={styles.pageTitle}>Driver Dashboard</h1>
       <div className={`ag-theme-alpine ${styles.dashboardContainer}`}>
         {isLoading ? (
           <p>Loading...</p>

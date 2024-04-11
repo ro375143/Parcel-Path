@@ -73,6 +73,7 @@ const DriverItinerary = ({ driverId }) => {
 
         // Attempt to stop scanning
         if (scannerRef.current) {
+          console.log("Attempting to stop scanning");
           scannerRef.current.stopScanning();
         }
       } else {
@@ -120,7 +121,7 @@ const DriverItinerary = ({ driverId }) => {
             {isScannerOpen && (
               <Modal
                 title="Scan QR Code"
-                visible={isScannerOpen}
+                open={isScannerOpen}
                 onOk={handleCloseScanner}
                 onCancel={handleCancelScanner}
                 footer={null}
@@ -128,17 +129,19 @@ const DriverItinerary = ({ driverId }) => {
                 <Scanner
                   ref={scannerRef}
                   onResult={(result, error) => {
-                    if (!!result) {
+                    if (result) {
                       handleScan(result);
                     }
-                    if (!!error) {
+                    if (error) {
                       console.error(error);
                     }
                   }}
+                  enabled={!scanProcessed} // Control scanner activation
                   style={{ width: "100%" }}
                 />
               </Modal>
             )}
+
             {itineraryPackages.length > 0 ? (
               <List
                 itemLayout="vertical"
