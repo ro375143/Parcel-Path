@@ -1,10 +1,10 @@
-/* styles.module.css */
+/* page.module.css */
 
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh;
+  height: 75vh;
 }
 
 .content {
@@ -14,52 +14,55 @@
 .slogan {
   font-size: 72px;
   color: #154734; /* Dark green */
+  margin-bottom: 40px; /* Add margin to create space below */
 }
 
-.track-package-button {
-  padding: 50px 50px;
-  font-size: 50px;
-  border: 2px solid #154734; /* Dark green */
-  background-color: transparent;
-  color: #154734; /* Dark green */
+.trackPackageButton {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  padding: 20px 40px;
+  font-size: 24px;
+  border: 2px solid #ffffff; /* Dark green */
+  background-color: #154734; /* Dark green */
+  color: #ffffff; /* White */
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.track-package-button:hover {
-  background-color: #154734; /* Dark green */
-  color: #ffffff; /* White */
+.trackPackageButton:hover {
+  background-color: #205b41; /* Darker green */
 }
 
-.business-info {
-  margin-top: 40px;
+.additionalInfo {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  height: 30vh;
+  font-size: 50px; /* Increased font size */
 }
 
-.business-info p {
-  font-size: 32px;
+.additionalInfo p {
+  font-size: 50px; /* Increased font size */
   color: #154734; /* Dark green */
-  margin-right: 20px;
+  margin-right: 40px; /* Increase margin for more space between text and button */
 }
 
-.register-business-button {
+.registerBusinessButton {
   padding: 15px 30px;
-  font-size: 18px;
-  border: 2px solid #154734; /* Dark green */
-  background-color: transparent;
-  color: #154734; /* Dark green */
+  font-size: 24px;
+  border: 2px solid #ffffff; /* Dark green */
+  background-color: #154734; /* Dark green */
+  color: #ffffff; /* White */
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: 40px; /* Add margin to create space between text and button */
 }
 
-.register-business-button:hover {
-  background-color: #154734; /* Dark green */
-  color: #ffffff; /* White */
+.registerBusinessButton:hover {
+  background-color: #205b41; /* Darker green */
 }
 
 .dashboardContainer {
