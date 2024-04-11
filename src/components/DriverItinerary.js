@@ -136,7 +136,7 @@ const DriverItinerary = ({ driverId }) => {
                       console.error(error);
                     }
                   }}
-                  enabled={!scanProcessed} // Control scanner activation
+                  stopDecoding={scanProcessed}
                   style={{ width: "100%" }}
                 />
               </Modal>
