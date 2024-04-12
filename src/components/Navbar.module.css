@@ -1,72 +1,87 @@
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #345454;
-    padding: 0 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #345454;
+  padding: 0 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.logoContainer {
+  flex-grow: 0;
+  justify-content: left;
+}
+
+.logoLink {
+  color: #FFF;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navLinksContainer {
+  display: flex;
+  align-items: center;
   
-  .logoContainer {
-    flex-grow: 0;
-    justify-content: left;
-  }
-  
-  .logoLink {
-    color: #FFF;
-    text-decoration: none;
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .navLinksContainer {
-    display: flex;
-    align-items: center;
-    
-  }
-  
-  .navLinks, .navLinksActive {
-    list-style: none;
-    display: flex;
-    padding: 0;
-  }
-  
-  .navLinks li a {
-    color: #FFF;
-    text-decoration: none;
-    padding: 1rem;
-    display: block;
-  }
-  
-  .navLinksActive {
-    display: block;
-  }
-  
-  .mobileMenuButton {
+}
+
+.navLinks, .navLinksActive {
+  list-style: none;
+  display: flex;
+  padding: 0;
+}
+
+.navLinks li a {
+  color: #FFF;
+  text-decoration: none;
+  padding: 0.5rem;
+  display: block;
+}
+
+.navLinksActive {
+  display: block;
+}
+
+.mobileMenuButton {
+  display: none;
+  background: none;
+  border: none;
+  color: #FFF;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .navLinks {
     display: none;
-    background: none;
-    border: none;
-    color: #FFF;
-    cursor: pointer;
   }
-  
-  @media (max-width: 768px) {
-    .navLinks {
-      display: none;
-    }
-  
-    .navLinksActive {
-      display: flex;
-      flex-direction: column;
-      position: absolute;
-      right: 0;
-      top: 60px;
-      background-color: #345454;
-      width: 100%;
-    }
-  
-    .mobileMenuButton {
-      display: inline-block;
-    }
+
+  .navLinksActive {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 60px;
+    background-color: #345454;
+    width: 100%;
   }
-  
+
+  .mobileMenuButton {
+    display: inline-block;
+  }
+}
+
+.customLogoutButton {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+
+  margin: 0;
+  display: inline-flex; 
+  align-items: center;
+  justify-content: center;
+
+
+}

@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth"; // Make sure to import signOut
+import { auth, db } from "@/app/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function DriverSignin() {
   const router = useRouter();
@@ -24,9 +25,20 @@ export default function DriverSignin() {
         email,
         password
       );
-      const uid = userCredential.user.uid.slice(0, 5);
+      const uid = userCredential.user.uid;
 
-      router.push(`/driver/${uid}/dashboard`);
+      // Check the user's role in Firestore
+      const userDocRef = doc(db, "users", uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists() && userDocSnap.data().role === "driver") {
+        // Redirect to the driver's dashboard
+        router.push(`/driver/${uid}/dashboard`);
+      } else {
+        // If the role is not 'driver', sign the user out and show an error message
+        await signOut(auth); // Sign the user out
+        setErrorMessage("Access denied. Only drivers can sign in here.");
+      }
     } catch (error) {
       console.error("Error signing in:", error);
       switch (error.code) {
@@ -58,7 +70,8 @@ export default function DriverSignin() {
             />
           </div>
           <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+              {/* Updated title to "Driver Login" */}
               <div className="flex justify-center">
                 <div
                   style={{ width: "300px", height: "90px", overflow: "hidden" }}
@@ -84,111 +97,91 @@ export default function DriverSignin() {
                   </h2>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-md">
-              <form onSubmit={handleSignIn} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-white"
-                  >
-                    Email address
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between">
+              <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-md">
+                <form onSubmit={handleSignIn} className="space-y-6">
+                  <div>
                     <label
-                      htmlFor="password"
+                      htmlFor="email"
                       className="block text-sm font-medium leading-6 text-white"
                     >
-                      Password
+                      Email address
                     </label>
-                    <div className="text-sm">
-                      <div
-                        onClick={() => router.push("/forgot-password")}
-                        className="cursor-pointer font-bold text-indigo-400 hover:text-indigo-300"
-                        style={{ color: "#345454" }}
-                      >
-                        Forgot password?
-                      </div>
+                    <div className="mt-2">
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
                     </div>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                </div>
 
-                {/* Error Message */}
-                {errorMessage && (
-                  <div className="text-sm text-red-500 font-bold">
-                    {errorMessage}
-                    {errorMessage.includes("No user found") && (
-                      <button onClick={() => router.push("../register/admin")}>
-                        Sign up
-                      </button>
-                    )}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor="password"
+                        className="block text-sm font-medium leading-6 text-white"
+                      >
+                        Password
+                      </label>
+                      <div className="text-sm">
+                        <div
+                          onClick={() => router.push("/forgot-password")}
+                          className="cursor-pointer font-bold text-indigo-400 hover:text-indigo-300"
+                          style={{ color: "#345454" }}
+                        >
+                          Forgot password?
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autoComplete="current-password"
+                        required
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
                   </div>
-                )}
 
-                <div>
-                  <button
-                    type="submit"
-                    disabled={!email || !password}
-                    className="disabled:opacity-40 flex w-full shadow-2xl justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    style={{
-                      backgroundColor: "#345454",
-                      transition: "background-color 0.3s",
-                    }}
-                    onMouseOver={(e) =>
-                      (e.target.style.backgroundColor = "#a4d7bb")
-                    }
-                    onMouseOut={(e) =>
-                      (e.target.style.backgroundColor = "#345454")
-                    }
-                  >
-                    Sign in
-                  </button>
-                </div>
-              </form>
+                  {/* Error Message */}
+                  {errorMessage && (
+                    <div className="text-sm text-red-500 font-bold">
+                      {errorMessage}
+                      {errorMessage.includes("No user found")}
+                    </div>
+                  )}
+
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={!email || !password}
+                      className="disabled:opacity-40 flex w-full shadow-2xl justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      style={{
+                        backgroundColor: "#345454",
+                        transition: "background-color 0.3s",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.target.style.backgroundColor = "#a4d7bb")
+                      }
+                      onMouseOut={(e) =>
+                        (e.target.style.backgroundColor = "#345454")
+                      }
+                    >
+                      Sign in
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-
-            <p
-              className="mt-4 text-center text-sm text-gray-400"
-              style={{ color: "#a4d7bb" }}
-            >
-              Not a member?{" "}
-              <a
-                href="#"
-                onClick={() => router.push("../register/user")}
-                className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300 "
-                style={{ color: "#345454" }}
-              >
-                Sign up now
-              </a>
-            </p>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth"; // Ensure signOut is imported
+import { auth, db } from "@/app/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function UserSignin() {
   const router = useRouter();
@@ -24,9 +25,18 @@ export default function UserSignin() {
         email,
         password
       );
-      const uid = userCredential.user.uid.slice(0, 5);
+      const uid = userCredential.user.uid;
 
-      router.push(`/user/${uid}/dashboard`);
+      const userDocRef = doc(db, "users", uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists() && userDocSnap.data().role === "customer") {
+        router.push(`/user/${uid}/dashboard`);
+      } else {
+        // If the role is not 'customer', sign the user out and show an error message
+        await signOut(auth); // Sign the user out
+        setErrorMessage("Access denied. Only customers can sign in here.");
+      }
     } catch (error) {
       console.error("Error signing in:", error);
       switch (error.code) {
@@ -146,7 +156,7 @@ export default function UserSignin() {
                   <div className="text-sm text-red-500 font-bold">
                     {errorMessage}
                     {errorMessage.includes("No user found") && (
-                      <button onClick={() => router.push("../register/admin")}>
+                      <button onClick={() => router.push("/register/user")}>
                         Sign up
                       </button>
                     )}
@@ -182,7 +192,7 @@ export default function UserSignin() {
               Not a member?{" "}
               <a
                 href="#"
-                onClick={() => router.push("../register/user")}
+                onClick={() => router.push("/register/user")}
                 className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300 "
                 style={{ color: "#345454" }}
               >

@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth"; // Import signOut
+import { auth, db } from "@/app/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function AdminSignin() {
   const router = useRouter();
@@ -24,9 +25,20 @@ export default function AdminSignin() {
         email,
         password
       );
-      const uid = userCredential.user.uid.slice(0, 5);
+      const uid = userCredential.user.uid;
 
-      router.push(`/admin/${uid}/dashboard`);
+      // Check the user's role in Firestore
+      const userDocRef = doc(db, "users", uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists() && userDocSnap.data().role === "admin") {
+        // Redirect to the admin dashboard
+        router.push(`/admin/${uid}/dashboard`);
+      } else {
+        // If the role is not 'admin', sign the user out and show an error message
+        await signOut(auth); // Immediately sign the user out
+        setErrorMessage("Access denied. Only administrators can sign in here.");
+      }
     } catch (error) {
       console.error("Error signing in:", error);
       switch (error.code) {
@@ -171,7 +183,7 @@ export default function AdminSignin() {
               Not a member?{" "}
               <a
                 href="#"
-                onClick={() => router.push("../register/user")}
+                onClick={() => router.push("/register/admin")}
                 className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300 "
                 style={{ color: "#345454" }}
               >

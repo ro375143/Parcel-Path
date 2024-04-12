@@ -1,0 +1,25 @@
+/* PackageGrid.module.css */
+.gridContainer {
+    margin: auto;
+    width: 95%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .gridContainer {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+}
+
+.actionButton {
+    margin: 0 8px; /* Adjust spacing around buttons */
+    display: inline-flex; /* Align the button text and icon */
+    align-items: center; /* Center items vertically */
+  }
+  
+  /* Additional styling for the search input if needed */
+  .searchInput {
+    width: 100%;
+  }
+  
