@@ -1,178 +1,155 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
-import { Form, Button, Input } from "antd";
-import { auth, db } from "@/app/firebase/config";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "@/app/firebase/config";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Button, Card, message } from "antd";
+import { db } from "@/app/firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth } from "@/app/firebase/config";
 
-const UserProfile = (props) => {
+const UserProfile = () => {
   const [form] = Form.useForm();
-  const [inputEnabled, setInput] = useState(true);
-  const [userInfo, setUserInfo] = useState(null);
+  const [editing, setEditing] = useState(false);
 
-  const defaultUser = {
-    userName: "testing@testing.com",
-    password: "123456",
-  };
-
-  const userDatafromDB = async () => {
-    console.log("UID is :" + auth.currentUser.uid);
-    const userRef = doc(db, "user", auth.currentUser.uid);
-    console.log("User Reference is : " + userRef);
-    const documentSnapshot = await getDoc(userRef);
-    console.log(
-      "documentSnapshot is : " +
-        JSON.stringify(documentSnapshot._document.data.value.mapValue.fields)
-    );
-    setUserInfo({
-      firstName:
-        documentSnapshot._document.data.value.mapValue.fields.firstName
-          .stringValue,
-      lastName:
-        documentSnapshot._document.data.value.mapValue.fields.lastName
-          .stringValue,
-      address:
-        documentSnapshot._document.data.value.mapValue.fields.email.stringValue,
-    });
-
-    // setUserInfo({
-    //   firstName: "Dhana",
-    //   lastName: "Neo",
-    //   address: "email",
-    // })
-  };
-
-  const signInWithEmailAndPasswordFirebase = async (email, password) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // router.route('/admin/id/profile')
-      // setUser(auth.currentUser)
-      userDatafromDB();
-    } catch (error) {
-      console.error("Error signing in:", error.message);
-      throw error;
-    }
-  };
-
-  const loadDefaultUser = async () => {
-    signInWithEmailAndPasswordFirebase(
-      defaultUser.userName,
-      defaultUser.password
-    );
-    console.log(
-      "CURRENT USER FROM DEFAULT is: " + JSON.stringify(auth.currentUser)
-    );
-  };
-
+  // Watch for authentication state changes and fetch user data
   useEffect(() => {
-    if (userInfo) {
-      form.setFieldsValue({
-        firstName: userInfo.firstName,
-        lastName: userInfo.lastName,
-        address: userInfo.address,
-      });
-    }
-  });
-
-  const editUser = () => {
-    setInput(false);
-    console.log("edit user clicked " + inputEnabled);
-  };
-
-  const submitUser = async () => {
-    setInput(true);
-    console.log("submit user clicked " + inputEnabled);
-
-    //TODO make sure that the doc gets updated
-    await updateDoc(doc(db, "user", auth.currentUser.uid), {
-      firstName: userInfo.firstName,
-      lastName: userInfo.lastName,
-      address: userInfo.address,
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        fetchUserData(currentUser.uid);
+      }
     });
+    return unsubscribe;
+  }, []);
+
+  // Fetch user data from Firestore
+  const fetchUserData = async (userId) => {
+    const userRef = doc(db, "users", userId);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      form.setFieldsValue({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        username: data.username,
+        street: data.address.street,
+        city: data.address.city,
+        state: data.address.state,
+        zipCode: data.address.zipCode,
+      });
+    } else {
+      message.error("User data not found.");
+    }
   };
 
-  //input change handlers
-  function handleFirstNameChange(ev) {
-    setUserInfo({ ...userInfo, firstName: ev.target.value });
-  }
-
-  function handleLastNameChange(ev) {
-    setUserInfo({ ...userInfo, lastName: ev.target.value });
-  }
-
-  function handleAddressChange(ev) {
-    setUserInfo({ ...userInfo, address: ev.target.value });
-  }
-
-  const cancelEditMode = () => {
-    setInput(true);
-    console.log("submit user clicked " + inputEnabled);
+  // Handle form submission for updates
+  const handleUpdate = async (values) => {
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    const updatedValues = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      phoneNumber: values.phoneNumber,
+      username: values.username,
+      address: {
+        street: values.street,
+        city: values.city,
+        state: values.state,
+        zipCode: values.zipCode,
+      },
+    };
+    try {
+      await updateDoc(userRef, updatedValues);
+      message.success("Profile updated successfully!");
+      setEditing(false);
+    } catch (error) {
+      message.error("Failed to update profile.");
+      console.error("Update error:", error);
+    }
   };
-
-  if (!userInfo) {
-    loadDefaultUser();
-    console.log("THERE IS NO USER");
-  }
 
   return (
-    <div>
-      <div
-        style={{
-          fontWeight: "bold",
-          color: "blue",
-          fontSize: 25,
-          flex: true,
-          margin: 15,
-        }}
-      >
-        PROFILE PAGE
-      </div>
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{
-          name: "",
-          description: "",
-          status: "",
-        }}
-      >
-        <Form.Item
-          name="firstName"
-          label="First Name"
-          rules={[{ required: true, message: "Please input your first name!" }]}
-        >
-          <Input disabled={inputEnabled} onChange={handleFirstNameChange} />
+    <Card title="User Profile" bordered={false} style={{ maxWidth: 600, margin: "20px auto" }}>
+      <Form form={form} layout="vertical" onFinish={handleUpdate} autoComplete="off">
+      <Form.Item
+    name="firstName"
+    label="First Name"
+    rules={[
+      { required: true, message: 'Please input your first name!' },
+      { pattern: /^[A-Za-z]+$/, message: 'First name must be letters only!' }
+    ]}
+  >
+    <Input disabled={!editing} />
+  </Form.Item>
+  <Form.Item
+    name="lastName"
+    label="Last Name"
+    rules={[
+      { required: true, message: 'Please input your last name!' },
+      { pattern: /^[A-Za-z]+$/, message: 'Last name must be letters only!' }
+    ]}
+  >
+    <Input disabled={!editing} />
+  </Form.Item>
+  <Form.Item
+    name="email"
+    label="Email"
+    rules={[
+      { required: true, message: 'Please input your email!' },
+      { type: 'email', message: 'Please enter a valid email!' }
+    ]}
+  >
+    <Input disabled={!editing} />
+  </Form.Item>
+  <Form.Item
+    name="phoneNumber"
+    label="Phone Number"
+    rules={[
+      { required: true, message: 'Please input your phone number!' },
+      { pattern: /^\d{10}$/, message: 'Phone number must be 10 digits!' }
+    ]}
+  >
+    <Input disabled={!editing} />
+  </Form.Item>
+
+        <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+          <Input disabled={true} />
+        </Form.Item>
+        <Form.Item name="street" label="Street" rules={[{ required: true }]}>
+          <Input disabled={!editing} />
+        </Form.Item>
+        <Form.Item name="city" label="City" rules={[{ required: true }]}>
+          <Input disabled={!editing} />
+        </Form.Item>
+        <Form.Item name="state" label="State" rules={[{ required: true }]}>
+          <Input disabled={!editing} />
         </Form.Item>
         <Form.Item
-          name="lastName"
-          label="Last Name"
-          rules={[{ required: true, message: "Please input your last name!" }]}
-        >
-          <Input disabled={inputEnabled} onChange={handleLastNameChange} />
-        </Form.Item>
-        <Form.Item
-          name="address"
-          label="Address"
-          rules={[{ required: true, message: "Please input your address!" }]}
-        >
-          <Input disabled={inputEnabled} onChange={handleAddressChange} />
-        </Form.Item>
-        {inputEnabled ? (
-          <Button onClick={editUser} disabled={!inputEnabled}>
-            Edit User
-          </Button>
-        ) : (
+    name="zipCode"
+    label="Zip Code"
+    rules={[
+      { required: true, message: 'Please input your zip code!' },
+      { pattern: /^\d{5}$/, message: 'Zip code must be 5 digits!' }
+    ]}
+  >
+    <Input disabled={!editing} />
+  </Form.Item>
+        {editing ? (
           <>
-            <Button onClick={submitUser} disabled={inputEnabled}>
-              Submit
+            <Button type="primary" htmlType="submit">
+              Save Changes
             </Button>
-            <Button onClick={cancelEditMode} disabled={inputEnabled}>
+            <Button style={{ marginLeft: 8 }} onClick={() => setEditing(false)}>
               Cancel
             </Button>
           </>
+        ) : (
+          <Button type="primary" onClick={() => setEditing(true)}>
+            Edit Profile
+          </Button>
         )}
       </Form>
-    </div>
+    </Card>
   );
 };
 
