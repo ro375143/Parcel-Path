@@ -14,6 +14,7 @@ import {
   arrayUnion,
   getDoc,
   setDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { auth } from "@/app/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
@@ -302,10 +303,13 @@ const CustomerPackagesGrid = () => {
 
     const feedbackRef = doc(collection(db, "feedback"));
     await setDoc(feedbackRef, {
-      userId: user.uid,
+      customerId: user.uid,
       packageId: selectedPackage.id,
       description: feedbackDescription,
       satisfied: isSatisfied,
+      createdAt: serverTimestamp(),
+      driverId: selectedPackage.assignedDriverId,
+      adminId: selectedPackage.adminId,
     });
 
     setIsFeedbackModalOpen(false);
