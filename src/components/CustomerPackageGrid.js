@@ -17,7 +17,30 @@ import {
 import { auth } from "@/app/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import styles from "./PackageGrid.module.css";
-
+const FeedbackButtonRenderer = ({
+  params,
+  onEdit,
+  onDelete,
+  userRole,
+  onView,
+}) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: "8px",
+        justifyContent: "center",
+        gap: "8px",
+      }}
+    >
+      {userRole === "customer" && (
+        <Button className="action-button" type="primary">
+          Track
+        </Button>
+      )}
+    </div>
+  );
+};
 const CustomerPackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
   const [user, setUser] = useState(null);
@@ -25,6 +48,9 @@ const CustomerPackagesGrid = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+  const [userRole, setRole] = useState(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [locationData, setLocationData] = useState(null);
 
   const columns = [
     {
@@ -94,6 +120,7 @@ const CustomerPackagesGrid = () => {
           ? new Date(params.value.seconds * 1000).toLocaleDateString()
           : "N/A",
     },
+
     {
       headerName: "Expected Delivery Date",
       field: "deliveryDate",
@@ -107,12 +134,23 @@ const CustomerPackagesGrid = () => {
           ? new Date(params.value.seconds * 1000).toLocaleDateString()
           : "N/A",
     },
+    {
+      headerName: "Actions",
+      field: "location",
+      cellRenderer: (params) => (
+        <div onClick={() => viewLocation(params.data)}>
+          <FeedbackButtonRenderer userRole={userRole} />
+        </div>
+      ),
+      flex: 1,
+    },
   ];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        fetchRole(currentUser);
         fetchTrackedPackages(currentUser.uid);
       } else {
         setUser(null);
@@ -142,6 +180,16 @@ const CustomerPackagesGrid = () => {
     } else {
       console.log("No packages tracked");
       setRowData([]);
+    }
+  };
+
+  const fetchRole = async (userId) => {
+    const uid = userId.uid;
+    const userRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      setRole(userDoc.data().role);
     }
   };
 
@@ -192,6 +240,58 @@ const CustomerPackagesGrid = () => {
     }
   };
 
+  const viewLocation = async (rowData) => {
+    try {
+      // Fetch the document from Firebase based on package ID
+      const packageDocRef = doc(db, "packages", rowData.id);
+      const packageDocSnap = await getDoc(packageDocRef);
+
+      if (packageDocSnap.exists()) {
+        // Extract location data from the document
+        const location = packageDocSnap.data().location;
+
+        // Set the location data to the state
+        setLocationData(location);
+
+        // Open the location modal
+        setIsLocationModalOpen(true);
+      } else {
+        console.log("Package document does not exist");
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
+  };
+
+  const getReverseGeocode = async (latitude, longitude) => {
+    try {
+      const apiKey = "AIzaSyC5HYJJRCJtLhekb51j8LA_5n596TwAM9M";
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+      );
+      const data = await response.json();
+      if (data.status === "OK" && data.results.length > 0) {
+        const addressComponents = data.results[0].address_components;
+        const city = addressComponents.find((component) =>
+          component.types.includes("locality")
+        );
+        const state = addressComponents.find((component) =>
+          component.types.includes("administrative_area_level_1")
+        );
+        if (city && state) {
+          return `${city.long_name}, ${state.short_name}`;
+        } else {
+          throw new Error("City and state not found in address components");
+        }
+      } else {
+        throw new Error("Reverse geocoding failed");
+      }
+    } catch (error) {
+      console.error("Error performing reverse geocoding:", error);
+      return null;
+    }
+  };
+
   return (
     <div className={`ag-theme-alpine ${styles.gridContainer}`}>
       <Row gutter={16} style={{ marginBottom: 16 }}>
@@ -233,6 +333,43 @@ const CustomerPackagesGrid = () => {
           value={trackingNumber}
           onChange={(e) => setTrackingNumber(e.target.value)}
         />
+      </Modal>
+      <Modal
+        title="Tracking Package"
+        visible={isLocationModalOpen}
+        onCancel={() => setIsLocationModalOpen(false)}
+        footer={null}
+      >
+        {/* Display location data in the modal */}
+        {locationData && (
+          <div>
+            <ul>
+              {locationData.map((locationMap, index) => (
+                <li key={index}>
+                  <p>
+                    Timestamp:{" "}
+                    {new Date(
+                      locationMap.timeStamp.seconds * 1000
+                    ).toLocaleString()}
+                  </p>
+                  <div style={{ marginLeft: "20px" }}>
+                    <p>
+                      Latitude: {locationMap.point?.latitude} Longitude:{" "}
+                      {locationMap.point?.longitude}
+                    </p>
+                    <p>
+                      City, State:{" "}
+                      {getReverseGeocode(
+                        locationMap.point?.latitude,
+                        locationMap.point?.longitude
+                      )}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Modal>
     </div>
   );
