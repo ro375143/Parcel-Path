@@ -60,19 +60,16 @@ const PackagesGrid = () => {
       headerName: "Tracking Number",
       field: "trackingNumber",
       flex: 1,
-      minWidth: 200,
+      minWidth: 100,
       maxWidth: 300,
-      pinned: "left",
-      lockedPinned: true,
-      suppressMovable: true,
     },
     {
       headerName: "Assigned Driver ID",
       field: "assignedDriverId",
       flex: 1,
-      minWidth: 150,
+      minWidth: 100,
       maxWidth: 300,
-      cellRenderer: (params) => params.value ?? "Not Assigned", // Display "Not Assigned" if no driver ID
+      cellRenderer: (params) => params.value ?? "Not Assigned",
     },
     {
       headerName: "Package Weight",
@@ -91,29 +88,34 @@ const PackagesGrid = () => {
     {
       headerName: "Ship Date",
       field: "shipDate",
-      cellRenderer: (params) => {
-        const date = params.value?.toDate ? params.value.toDate() : null;
-        return date ? dayjs(date).format("MM-DD-YYYY") : ""; // Using dayjs for formatting
-      },
       flex: 1,
       minWidth: 100,
       maxWidth: 300,
-    },
-    {
-      headerName: "Delivery Date",
-      field: "deliveryDate",
       cellRenderer: (params) => {
         const date = params.value?.toDate ? params.value.toDate() : null;
         return date ? dayjs(date).format("MM-DD-YYYY") : "";
       },
+    },
+    {
+      headerName: "Delivery Date",
+      field: "deliveryDate",
       flex: 1,
       minWidth: 100,
       maxWidth: 300,
+      cellRenderer: (params) => {
+        const date = params.value?.toDate ? params.value.toDate() : null;
+        return date ? dayjs(date).format("MM-DD-YYYY") : "";
+      },
     },
-
     {
       headerName: "Actions",
       field: "id",
+      flex: 1,
+      minWidth: 210, // Specific width for actions column
+      maxWidth: 210,
+      pinned: "right",
+      lockedPinned: true,
+      suppressMovable: true,
       cellRenderer: (params) => (
         <ButtonRenderer
           params={params}
@@ -121,12 +123,6 @@ const PackagesGrid = () => {
           onDelete={deletePackage}
         />
       ),
-      flex: 1,
-      minWidth: 210,
-      maxWidth: 210,
-      pinned: "right",
-      lockedPinned: true,
-      suppressMovable: true,
     },
   ];
 
@@ -206,14 +202,12 @@ const PackagesGrid = () => {
   }, []);
 
   const fetchPackages = async () => {
-    console.log("Fetching packages...");
     try {
       const querySnapshot = await getDocs(collection(db, "packages"));
       const packagesArray = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("Packages fetched:", packagesArray);
       setRowData(packagesArray);
       setFilteredData(packagesArray); // Make sure to set filteredData as well
     } catch (error) {
@@ -313,6 +307,7 @@ const PackagesGrid = () => {
           columnDefs={columns}
           domLayout="autoHeight"
           rowHeight={40}
+          enableRangeSelection={true}
           style={{ borderRadius: "10px", overflow: "hidden" }}
         />
       </div>

@@ -40,7 +40,6 @@ const Navbar = () => {
         setUserRole(null);
         setUid(null);
         setLoading(false); // End loading after fetching role
-
       }
     });
     return () => unsubscribe();
@@ -69,7 +68,6 @@ const Navbar = () => {
       { name: "Dashboard", path: `/user/${uid}/dashboard` },
       { name: "Feedback", path: `/user/${uid}/feedback` },
       { name: "Profile", path: `/user/${uid}/profile` },
-      { name: "Tracking", path: `/user/${uid}/tracking` },
     ],
     driver: [
       { name: "Dashboard", path: `/driver/${uid}/dashboard` },
@@ -114,7 +112,7 @@ const Navbar = () => {
     if (!userRole) {
       console.error("User role not yet loaded or undefined.");
       return [];
-  }
+    }
     const roleLinks = roleBasedLinks[userRole];
     if (!roleLinks) {
       console.error("Unrecognized role or role not yet loaded:", userRole);
