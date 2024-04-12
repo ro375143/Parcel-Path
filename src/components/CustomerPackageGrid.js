@@ -13,12 +13,13 @@ import {
   updateDoc,
   arrayUnion,
   getDoc,
-  setDoc
+  setDoc,
 } from "firebase/firestore";
 import { auth } from "@/app/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import styles from "./PackageGrid.module.css";
 import FeedbackButtonRenderer from "./FeedbackButtonRenderer";
+import TrackButtonRenderer from "./TrackButtonRenderer";
 
 const CustomerPackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -31,6 +32,9 @@ const CustomerPackagesGrid = () => {
   const [feedbackDescription, setFeedbackDescription] = useState("");
   const [isSatisfied, setIsSatisfied] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [locationData, setLocationData] = useState(null);
+  const [userRole, setRole] = useState(null);
 
   const handleFeedbackClick = (packageData) => {
     setSelectedPackage(packageData);
@@ -131,13 +135,84 @@ const CustomerPackagesGrid = () => {
       maxWidth: 200,
       sortable: false,
       filter: false,
-    }
+    },
+    {
+      headerName: "Actions",
+      field: "location",
+      cellRenderer: (params) => (
+        <div onClick={() => viewLocation(params.data)}>
+          <TrackButtonRenderer userRole={userRole} />
+        </div>
+      ),
+      minWidth: 150,
+      maxWidth: 200,
+      sortable: false,
+      filter: false,
+    },
   ];
+
+  const viewLocation = async (rowData) => {
+    try {
+      const packageDocRef = doc(db, "packages", rowData.id);
+      const packageDocSnap = await getDoc(packageDocRef);
+
+      if (packageDocSnap.exists()) {
+        const location = packageDocSnap.data().location;
+
+        setLocationData(location);
+
+        setIsLocationModalOpen(true);
+      } else {
+        console.log("Package document does not exist");
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
+  };
+  const getReverseGeocode = async (latitude, longitude) => {
+    try {
+      const apiKey = "AIzaSyC5HYJJRCJtLhekb51j8LA_5n596TwAM9M";
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+      );
+      const data = await response.json();
+      if (data.status === "OK" && data.results.length > 0) {
+        const addressComponents = data.results[0].address_components;
+        const city = addressComponents.find((component) =>
+          component.types.includes("locality")
+        );
+        const state = addressComponents.find((component) =>
+          component.types.includes("administrative_area_level_1")
+        );
+        if (city && state) {
+          return `${city.long_name}, ${state.short_name}`;
+        } else {
+          throw new Error("City and state not found in address components");
+        }
+      } else {
+        throw new Error("Reverse geocoding failed");
+      }
+    } catch (error) {
+      console.error("Error performing reverse geocoding:", error);
+      return null;
+    }
+  };
+
+  const fetchRole = async (userId) => {
+    const uid = userId.uid;
+    const userRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      setRole(userDoc.data().role);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        fetchRole(currentUser);
         fetchTrackedPackages(currentUser.uid);
       } else {
         setUser(null);
@@ -221,10 +296,10 @@ const CustomerPackagesGrid = () => {
   useEffect(() => {
     setFilteredData(rowData);
   }, [rowData]);
-  
+
   const submitFeedback = async () => {
     if (!selectedPackage) return;
-  
+
     const feedbackRef = doc(collection(db, "feedback"));
     await setDoc(feedbackRef, {
       userId: user.uid,
@@ -232,16 +307,15 @@ const CustomerPackagesGrid = () => {
       description: feedbackDescription,
       satisfied: isSatisfied,
     });
-  
+
     setIsFeedbackModalOpen(false);
     setFeedbackDescription("");
     setIsSatisfied(false);
   };
-  
+
   const handleSatisfactionChange = (e) => {
     setIsSatisfied(e.target.checked);
   };
-  
 
   return (
     <div className={`ag-theme-alpine ${styles.gridContainer}`}>
@@ -270,7 +344,7 @@ const CustomerPackagesGrid = () => {
         domLayout="autoHeight"
         rowHeight={40}
         frameworkComponents={{
-          feedbackButtonRenderer: FeedbackButtonRenderer,  // Registering the renderer
+          feedbackButtonRenderer: FeedbackButtonRenderer, // Registering the renderer
         }}
         style={{ borderRadius: "10px", overflow: "hidden" }}
       />
@@ -291,25 +365,58 @@ const CustomerPackagesGrid = () => {
       </Modal>
 
       <Modal
-  title="Give Feedback on Package"
-  open={isFeedbackModalOpen}
-  onOk={submitFeedback}
-  onCancel={() => setIsFeedbackModalOpen(false)}
->
-  <Input.TextArea
-    rows={4}
-    value={feedbackDescription}
-    onChange={(e) => setFeedbackDescription(e.target.value)}
-    placeholder="Describe your experience..."
-  />
-  <Checkbox
-    checked={isSatisfied}
-    onChange={handleSatisfactionChange}
-  >
-    Are you satisfied with the package?
-  </Checkbox>
-</Modal>
-
+        title="Give Feedback on Package"
+        open={isFeedbackModalOpen}
+        onOk={submitFeedback}
+        onCancel={() => setIsFeedbackModalOpen(false)}
+      >
+        <Input.TextArea
+          rows={4}
+          value={feedbackDescription}
+          onChange={(e) => setFeedbackDescription(e.target.value)}
+          placeholder="Describe your experience..."
+        />
+        <Checkbox checked={isSatisfied} onChange={handleSatisfactionChange}>
+          Are you satisfied with the package?
+        </Checkbox>
+      </Modal>
+      <Modal
+        title="Tracking Package"
+        visible={isLocationModalOpen}
+        onCancel={() => setIsLocationModalOpen(false)}
+        footer={null}
+      >
+        {/* Display location data in the modal */}
+        {locationData && (
+          <div>
+            <ul>
+              {locationData.map((locationMap, index) => (
+                <li key={index}>
+                  <p>
+                    Timestamp:{" "}
+                    {new Date(
+                      locationMap.timeStamp.seconds * 1000
+                    ).toLocaleString()}
+                  </p>
+                  <div style={{ marginLeft: "20px" }}>
+                    <p>
+                      Latitude: {locationMap.point?.latitude} Longitude:{" "}
+                      {locationMap.point?.longitude}
+                    </p>
+                    <p>
+                      City, State:{" "}
+                      {getReverseGeocode(
+                        locationMap.point?.latitude,
+                        locationMap.point?.longitude
+                      )}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

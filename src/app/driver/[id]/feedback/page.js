@@ -1,11 +1,15 @@
 import React from "react";
+import FeedbackGrid from "@/components/FeedbackGrid";
 
-const DriverFeedback = () => {
+const FeedbackQueue = () => {
   return (
-    <div>
-      <h1>Driver Feedback</h1>
+    <div style={{ padding: "10px", margin: "5px" }}>
+      <h1 style={{ margin: "0", padding: "1rem", fontSize: "1rem" }}>
+        FEEDBACK QUEUE
+      </h1>
+      <FeedbackGrid />
     </div>
   );
 };
 
-export default DriverFeedback;
+export default FeedbackQueue;
