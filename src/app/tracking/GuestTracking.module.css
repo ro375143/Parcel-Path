@@ -1,0 +1,25 @@
+/* GuestTracking.module.css */
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #ffffff;  /* Change this to any color that fits your design */
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .signUp {
+    margin-top: 40px;
+    text-align: center;
+  }
+  
+  .signUpText {
+    font-size: medium;
+    margin-bottom: 20px;
+  }
+  
