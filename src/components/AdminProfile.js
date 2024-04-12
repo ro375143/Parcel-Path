@@ -6,7 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth } from "@/app/firebase/config";
 
-const UserProfile = () => {
+const AdminProfile = () => {
   const [form] = Form.useForm();
   const [editing, setEditing] = useState(false);
 
@@ -30,12 +30,8 @@ const UserProfile = () => {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        phoneNumber: data.phoneNumber,
         username: data.username,
-        street: data.address.street,
-        city: data.address.city,
-        state: data.address.state,
-        zipCode: data.address.zipCode,
+
       });
     } else {
       message.error("User data not found.");
@@ -49,14 +45,8 @@ const UserProfile = () => {
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phoneNumber: values.phoneNumber,
       username: values.username,
-      address: {
-        street: values.street,
-        city: values.city,
-        state: values.state,
-        zipCode: values.zipCode,
-      },
+      
     };
     try {
       await updateDoc(userRef, updatedValues);
@@ -101,39 +91,10 @@ const UserProfile = () => {
   >
     <Input disabled={true} />
   </Form.Item>
-  <Form.Item
-    name="phoneNumber"
-    label="Phone Number"
-    rules={[
-      { required: true, message: 'Please input your phone number!' },
-      { pattern: /^\d{10}$/, message: 'Phone number must be 10 digits!' }
-    ]}
-  >
-    <Input disabled={!editing} />
-  </Form.Item>
 
         <Form.Item name="username" label="Username" rules={[{ required: true }]}>
           <Input disabled={true} />
         </Form.Item>
-        <Form.Item name="street" label="Street" rules={[{ required: true }]}>
-          <Input disabled={!editing} />
-        </Form.Item>
-        <Form.Item name="city" label="City" rules={[{ required: true }]}>
-          <Input disabled={!editing} />
-        </Form.Item>
-        <Form.Item name="state" label="State" rules={[{ required: true }]}>
-          <Input disabled={!editing} />
-        </Form.Item>
-        <Form.Item
-    name="zipCode"
-    label="Zip Code"
-    rules={[
-      { required: true, message: 'Please input your zip code!' },
-      { pattern: /^\d{5}$/, message: 'Zip code must be 5 digits!' }
-    ]}
-  >
-    <Input disabled={!editing} />
-  </Form.Item>
         {editing ? (
           <>
             <Button type="primary" htmlType="submit">
@@ -153,4 +114,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default AdminProfile;
