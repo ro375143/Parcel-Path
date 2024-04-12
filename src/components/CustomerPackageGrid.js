@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { Button, Input, Modal, Row, Col } from "antd";
+import { Button, Input, Modal, Row, Col, Checkbox } from "antd";
 import { db } from "@/app/firebase/config";
 import {
   collection,
@@ -13,10 +13,12 @@ import {
   updateDoc,
   arrayUnion,
   getDoc,
+  setDoc
 } from "firebase/firestore";
 import { auth } from "@/app/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import styles from "./PackageGrid.module.css";
+import FeedbackButtonRenderer from "./FeedbackButtonRenderer";
 
 const CustomerPackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -25,6 +27,15 @@ const CustomerPackagesGrid = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackDescription, setFeedbackDescription] = useState("");
+  const [isSatisfied, setIsSatisfied] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+
+  const handleFeedbackClick = (packageData) => {
+    setSelectedPackage(packageData);
+    setIsFeedbackModalOpen(true);
+  };
 
   const columns = [
     {
@@ -107,6 +118,20 @@ const CustomerPackagesGrid = () => {
           ? new Date(params.value.seconds * 1000).toLocaleDateString()
           : "N/A",
     },
+    {
+      headerName: "Give Feedback",
+      field: "feedback",
+      cellRenderer: (params) => (
+        <FeedbackButtonRenderer
+          data={params.data}
+          onFeedback={handleFeedbackClick}
+        />
+      ),
+      minWidth: 150,
+      maxWidth: 200,
+      sortable: false,
+      filter: false,
+    }
   ];
 
   useEffect(() => {
@@ -171,6 +196,7 @@ const CustomerPackagesGrid = () => {
       });
     }
     setIsTrackingModalOpen(false);
+    setTrackingNumber("");
   };
 
   const handleSearch = (value) => {
@@ -191,6 +217,31 @@ const CustomerPackagesGrid = () => {
       setFilteredData(rowData);
     }
   };
+
+  useEffect(() => {
+    setFilteredData(rowData);
+  }, [rowData]);
+  
+  const submitFeedback = async () => {
+    if (!selectedPackage) return;
+  
+    const feedbackRef = doc(collection(db, "feedback"));
+    await setDoc(feedbackRef, {
+      userId: user.uid,
+      packageId: selectedPackage.id,
+      description: feedbackDescription,
+      satisfied: isSatisfied,
+    });
+  
+    setIsFeedbackModalOpen(false);
+    setFeedbackDescription("");
+    setIsSatisfied(false);
+  };
+  
+  const handleSatisfactionChange = (e) => {
+    setIsSatisfied(e.target.checked);
+  };
+  
 
   return (
     <div className={`ag-theme-alpine ${styles.gridContainer}`}>
@@ -218,8 +269,12 @@ const CustomerPackagesGrid = () => {
         columnDefs={columns}
         domLayout="autoHeight"
         rowHeight={40}
+        frameworkComponents={{
+          feedbackButtonRenderer: FeedbackButtonRenderer,  // Registering the renderer
+        }}
         style={{ borderRadius: "10px", overflow: "hidden" }}
       />
+
       <Modal
         title="Track a Package"
         visible={isTrackingModalOpen}
@@ -234,6 +289,27 @@ const CustomerPackagesGrid = () => {
           onChange={(e) => setTrackingNumber(e.target.value)}
         />
       </Modal>
+
+      <Modal
+  title="Give Feedback on Package"
+  open={isFeedbackModalOpen}
+  onOk={submitFeedback}
+  onCancel={() => setIsFeedbackModalOpen(false)}
+>
+  <Input.TextArea
+    rows={4}
+    value={feedbackDescription}
+    onChange={(e) => setFeedbackDescription(e.target.value)}
+    placeholder="Describe your experience..."
+  />
+  <Checkbox
+    checked={isSatisfied}
+    onChange={handleSatisfactionChange}
+  >
+    Are you satisfied with the package?
+  </Checkbox>
+</Modal>
+
     </div>
   );
 };

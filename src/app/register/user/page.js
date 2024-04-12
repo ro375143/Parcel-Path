@@ -75,6 +75,7 @@ export default function CustomerSignUp() {
         },
         phoneNumber: phoneNumber,
         role: "customer",
+        trackedPackages: [],
       });
 
       // Sign out the user immediately after account creation
