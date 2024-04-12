@@ -1,11 +1,14 @@
 import React from 'react';
+import DriverProfile from '@/components/DriverProfile';
 
-const DriverProfile = () => {
+const DriverProfilePage = () => {
+
   return (
     <div>
       <h1>Driver Profile</h1>
+      <DriverProfile />
     </div>
   );
 }
 
-export default DriverProfile;
+export default DriverProfilePage;
