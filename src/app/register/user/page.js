@@ -51,6 +51,28 @@ export default function CustomerSignUp() {
       setErrorMessage("Passwords do not match.");
       return;
     }
+    const nameRegex = /^[A-Za-z]+$/; // Regex to allow only letters
+    if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+      setErrorMessage("First name and last name can only contain letters.");
+      return;
+    }
+    const zipCodeRegex = /^\d{5}$/; // Regex to match 5 digits
+    if (!zipCodeRegex.test(zipCode)) {
+      setErrorMessage("Zip code must be 5 digits.");
+      return;
+    }
+
+    // Validation for phone number
+    const phoneNumberRegex = /^\d{10}$/; // Regex to match 10 digits
+    if (!phoneNumberRegex.test(phoneNumber)) {
+      setErrorMessage("Phone number must be 10 digits.");
+      return;
+    }
+    const stateRegex = /^[A-Za-z]{2}$/; // Regex to match 2 letters
+    if (!stateRegex.test(state)) {
+      setErrorMessage("State must be 2 letters.");
+      return;
+    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -148,7 +170,13 @@ export default function CustomerSignUp() {
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z '-]/g,
+                        ""
+                      );
+                      setFirstName(inputValue);
+                    }}
                   />
                 </div>
 
@@ -167,7 +195,13 @@ export default function CustomerSignUp() {
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z '-]/g,
+                        ""
+                      );
+                      setLastName(inputValue);
+                    }}
                   />
                 </div>
 
@@ -331,11 +365,17 @@ export default function CustomerSignUp() {
                     id="streetAddress"
                     name="streetAddress"
                     type="text"
-                    autoComplete="given-name"
+                    autoComplete="off"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={streetAddress}
-                    onChange={(e) => setStreetAddress(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z0-9\s]/g,
+                        ""
+                      ); // Remove any characters that are not letters, numbers, or whitespace
+                      setStreetAddress(inputValue);
+                    }}
                   />
                 </div>
 
@@ -350,11 +390,17 @@ export default function CustomerSignUp() {
                     id="city"
                     name="city"
                     type="text"
-                    autoComplete="family-name"
+                    autoComplete="off"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z]/g,
+                        ""
+                      ); // Remove any characters that are not letters
+                      setCity(inputValue);
+                    }}
                   />
                 </div>
 
@@ -369,11 +415,18 @@ export default function CustomerSignUp() {
                     id="state"
                     name="state"
                     type="text"
-                    autoComplete="state"
+                    autoComplete="off"
+                    maxLength="2"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value
+                        .replace(/[^A-Za-z]/g, "")
+                        .slice(0, 2)
+                        .toUpperCase(); // Remove any characters that are not letters, take only the first two characters, and convert to uppercase
+                      setState(inputValue);
+                    }}
                   />
                 </div>
 

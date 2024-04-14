@@ -120,7 +120,7 @@ export default function AdminSignUp() {
                 style={{ backgroundColor: "#345454" }}
               >
                 <h2 className="text-2xl font-extrabold text-white">
-                  Register Admin Account
+                  Register Customer Account
                 </h2>
               </div>
             </div>
@@ -147,7 +147,13 @@ export default function AdminSignUp() {
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z '-]/g,
+                        ""
+                      );
+                      setFirstName(inputValue);
+                    }}
                   />
                 </div>
 
@@ -166,7 +172,13 @@ export default function AdminSignUp() {
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z '-]/g,
+                        ""
+                      );
+                      setLastName(inputValue);
+                    }}
                   />
                 </div>
 
@@ -330,11 +342,17 @@ export default function AdminSignUp() {
                     id="streetAddress"
                     name="streetAddress"
                     type="text"
-                    autoComplete="given-name"
+                    autoComplete="off"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={streetAddress}
-                    onChange={(e) => setStreetAddress(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z0-9\s]/g,
+                        ""
+                      ); // Remove any characters that are not letters, numbers, or whitespace
+                      setStreetAddress(inputValue);
+                    }}
                   />
                 </div>
 
@@ -349,11 +367,17 @@ export default function AdminSignUp() {
                     id="city"
                     name="city"
                     type="text"
-                    autoComplete="family-name"
+                    autoComplete="off"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(
+                        /[^A-Za-z]/g,
+                        ""
+                      ); // Remove any characters that are not letters
+                      setCity(inputValue);
+                    }}
                   />
                 </div>
 
@@ -368,11 +392,18 @@ export default function AdminSignUp() {
                     id="state"
                     name="state"
                     type="text"
-                    autoComplete="state"
+                    autoComplete="off"
+                    maxLength="2"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    onChange={(e) => {
+                      const inputValue = e.target.value
+                        .replace(/[^A-Za-z]/g, "")
+                        .slice(0, 2)
+                        .toUpperCase(); // Remove any characters that are not letters, take only the first two characters, and convert to uppercase
+                      setState(inputValue);
+                    }}
                   />
                 </div>
 
@@ -427,7 +458,6 @@ export default function AdminSignUp() {
                           setPhoneNumber(formattedValue);
                           setErrorMessage("");
                         } else {
-                          setErrorMessage();
                         }
                       }}
                     />
@@ -492,7 +522,7 @@ export default function AdminSignUp() {
           >
             Already have an account?{" "}
             <button
-              onClick={() => router.push("../login/admin")}
+              onClick={() => router.push("../login/user")}
               className="font-bold leading-6 text-green-400 hover:text-green-300"
               style={{ color: "#345454" }}
             >
