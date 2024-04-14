@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
+
 import {
   Modal,
   Form,
@@ -9,17 +10,20 @@ import {
   InputNumber,
   message,
 } from "antd";
-import { db } from "@/app/firebase/config";
+import { db, auth } from "@/app/firebase/config";
 import {
   collection,
   addDoc,
   serverTimestamp,
   Timestamp,
+  doc,
+  getDoc,
+  GeoPoint,
 } from "firebase/firestore";
 
 const CreatePackageModal = ({ isOpen, onClose }) => {
   const [form] = Form.useForm();
-
+  const axios = require("axios");
   const generateRandomString = (length = 6) => {
     const characters =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -32,15 +36,46 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
     return result;
   };
 
+  async function addressToCoordinates(address) {
+    const apiKey = "AIzaSyANIaV2VMUDxZnKsxqCiGZd7EnCYNyOvgc";
+    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+
+    try {
+      const response = await axios.get(apiUrl);
+      if (
+        response.data &&
+        response.data.results &&
+        response.data.results.length > 0
+      ) {
+        const location = response.data.results[0].geometry.location;
+        return {
+          latitude: location.lat,
+          longitude: location.lng,
+        };
+      } else {
+        throw new Error("No results found for the address.");
+      }
+    } catch (error) {
+      throw new Error("Error geocoding address: " + error.message);
+    }
+  }
   const handleSubmit = async () => {
     try {
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      const userDoc = await getDoc(userRef);
+      const { street, city, state } = userDoc.data().address;
+      const address = `${street}, ${city}, ${state}, USA`;
       const values = await form.validateFields();
       const packageWeightNumber = parseFloat(values.packageWeight);
-      const randomChars = generateRandomString(); // Generates a random 6-character string
-      const trackingNumber = `PKG-${Date.now()}-${randomChars}`;
+      const trackingNumber = `PKG-${Date.now()}-${generateRandomString()}`;
+      const coordinates = await addressToCoordinates(address);
+      const geopoint = new GeoPoint(
+        coordinates.latitude,
+        coordinates.longitude
+      );
 
       const deliveryDate = values.deliveryDate
-        ? Timestamp.fromDate(values.deliveryDate.toDate()) // Convert moment object to Date then to Firestore Timestamp
+        ? Timestamp.fromDate(values.deliveryDate.toDate())
         : null;
 
       const packageData = {
@@ -49,8 +84,15 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
         deliveryDate,
         shipDate: serverTimestamp(),
         trackingNumber,
-        driverAssigned: false, // Add driverAssigned field set to false
-        assignedDriverId: null, // Add assignedDriverId field set to null
+        driverAssigned: false,
+        assignedDriverId: null,
+        adminId: auth.currentUser.uid,
+        location: [
+          {
+            geopoint,
+            timeStamp: new Date().toString(),
+          },
+        ],
       };
 
       await addDoc(collection(db, "packages"), packageData);
