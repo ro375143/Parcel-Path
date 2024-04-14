@@ -39,7 +39,7 @@ export default function AdminAssignPackage() {
   useEffect(() => {
     fetchDrivers();
     fetchPackages();
-  }, [fetchDrivers, fetchPackages]);
+  }, []); // removed [fetchDrivers, fetchPackages] causing infinite reads in db
 
   const handleAssignPackage = async () => {
     if (!selectedDriver || !selectedPackage) {
