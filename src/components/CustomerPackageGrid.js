@@ -21,6 +21,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import styles from "./PackageGrid.module.css";
 import FeedbackButtonRenderer from "./FeedbackButtonRenderer";
 import TrackButtonRenderer from "./TrackButtonRenderer";
+import { GoogleMap, LoadScript, Polyline } from "@react-google-maps/api";
 
 const CustomerPackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -37,6 +38,7 @@ const CustomerPackagesGrid = () => {
   const [locationData, setLocationData] = useState(null);
   const [userRole, setRole] = useState(null);
   const [cityState, setCityState] = useState(null);
+  const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
 
   const handleFeedbackClick = (packageData) => {
     setSelectedPackage(packageData);
@@ -186,6 +188,7 @@ const CustomerPackagesGrid = () => {
       console.error("Error fetching location data:", error);
     }
   };
+
   useEffect(() => {
     if (locationData) {
       locationData.forEach((location) => {
@@ -193,8 +196,8 @@ const CustomerPackagesGrid = () => {
       });
     }
   }, [locationData]);
+
   function getCityState(lat, lng) {
-    const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
     return fetch(url)
@@ -205,9 +208,11 @@ const CustomerPackagesGrid = () => {
           const city = components.find((component) =>
             component.types.includes("locality")
           );
+
           const state = components.find((component) =>
             component.types.includes("administrative_area_level_1")
           );
+
           if (city && state) {
             return `${city.long_name}, ${state.short_name}`;
           } else {
@@ -414,31 +419,56 @@ const CustomerPackagesGrid = () => {
         open={isLocationModalOpen}
         onCancel={() => setIsLocationModalOpen(false)}
         footer={null}
+        width={800} // Adjust width to fit the map
       >
         {locationData && (
-          <div>
+          <>
+            <LoadScript googleMapsApiKey={apiKey}>
+              <GoogleMap
+                mapContainerStyle={{ width: "100%", height: "400px" }}
+                center={
+                  locationData.length > 0
+                    ? {
+                        lat: locationData[0].geopoint.latitude,
+                        lng: locationData[0].geopoint.longitude,
+                      }
+                    : { lat: 0, lng: 0 }
+                }
+                zoom={10}
+              >
+                <Polyline
+                  path={locationData.map((loc) => ({
+                    lat: loc.geopoint.latitude,
+                    lng: loc.geopoint.longitude,
+                  }))}
+                  options={{
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.35,
+                  }}
+                />
+              </GoogleMap>
+            </LoadScript>
             <ul>
               {locationData.map((location, index) => (
                 <li key={index}>
+                  <strong>
+                    Timestamp: {new Date(location.timeStamp).toLocaleString()}
+                  </strong>
                   <p>
-                    <strong>
-                      Timestamp: {new Date(location.timeStamp).toLocaleString()}
-                    </strong>
-                  </p>{" "}
-                  <div style={{ marginLeft: "20px" }}>
-                    <p>
-                      Latitude: {location.geopoint?.latitude} Longitude:{" "}
-                      {location.geopoint?.longitude}
-                    </p>
-                    {location.cityState && (
-                      <p>City, State: {location.cityState}</p>
-                    )}
-                    <p>Status: {location.status}</p>
-                  </div>
+                    Latitude: {location.geopoint.latitude}, Longitude:{" "}
+                    {location.geopoint.longitude}
+                  </p>
+                  {location.cityState && (
+                    <p>City, State: {location.cityState}</p>
+                  )}
+                  <p>Status: {location.status}</p>
                 </li>
               ))}
             </ul>
-          </div>
+          </>
         )}
       </Modal>
     </div>

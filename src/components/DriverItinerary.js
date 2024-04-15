@@ -10,7 +10,6 @@ import {
   updateDoc,
   GeoPoint,
   arrayUnion,
-  onSnapshot,
 } from "firebase/firestore";
 import {
   List,
@@ -27,11 +26,9 @@ import {
 } from "antd";
 import moment from "moment";
 import { QrScanner } from "@yudiel/react-qr-scanner";
-import { ToastContainer, toast } from "react-toastify";
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
-const { TextArea } = Input;
 const { Option } = Select;
 
 const DriverItinerary = ({ driverId }) => {
@@ -86,6 +83,22 @@ const DriverItinerary = ({ driverId }) => {
     setTrackingNumber("");
   };
 
+  const getCurrentPosition = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+        setUpdateModalVisible(true); // Move modal open call here after position is set
+      },
+      (error) => {
+        console.error("Error getting current position:", error);
+        message.error(
+          "Failed to get current position. Please ensure location services are enabled."
+        );
+      }
+    );
+  };
+
   const handleScan = (value) => {
     if (value && !scanResult.length) {
       setScanResult(value);
@@ -95,7 +108,7 @@ const DriverItinerary = ({ driverId }) => {
       );
       if (scannedPackage) {
         setSelectedPackage(scannedPackage);
-        setUpdateModalVisible(true);
+        getCurrentPosition(); // Fetch current position right here
       } else {
         message.error("Package not found in itinerary.");
       }
@@ -114,18 +127,6 @@ const DriverItinerary = ({ driverId }) => {
     message.success(`Package ${selectedPackage.name} updated!`);
     setUpdateModalVisible(false);
     fetchDriverPackages();
-  };
-
-  const getCurrentPosition = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude);
-        setLongitude(position.coords.longitude);
-      },
-      (error) => {
-        console.error("Error getting current position:", error);
-      }
-    );
   };
 
   useEffect(() => {
@@ -154,7 +155,7 @@ const DriverItinerary = ({ driverId }) => {
             {isScannerOpen && (
               <Modal
                 title="Scan QR Code"
-                visible={isScannerOpen}
+                open={isScannerOpen}
                 onCancel={closeScanner}
                 footer={null}
               >

@@ -373,9 +373,9 @@ export default function AdminSignUp() {
                     value={city}
                     onChange={(e) => {
                       const inputValue = e.target.value.replace(
-                        /[^A-Za-z]/g,
+                        /[^A-Za-z\s-]/g, // Allow letters, spaces, and dashes
                         ""
-                      ); // Remove any characters that are not letters
+                      );
                       setCity(inputValue);
                     }}
                   />

@@ -37,9 +37,11 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
   };
 
   async function addressToCoordinates(address) {
+    console.log(address);
     const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-
+    console.log(apiUrl);
+    console.log(apiKey);
     try {
       const response = await axios.get(apiUrl);
       if (
@@ -59,12 +61,14 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
       throw new Error("Error geocoding address: " + error.message);
     }
   }
+
   const handleSubmit = async () => {
     try {
       const userRef = doc(db, "users", auth.currentUser.uid);
       const userDoc = await getDoc(userRef);
       const { street, city, state } = userDoc.data().address;
       const address = `${street}, ${city}, ${state}, USA`;
+      console.log(address);
       const values = await form.validateFields();
       const packageWeightNumber = parseFloat(values.packageWeight);
       const trackingNumber = `PKG-${Date.now()}-${generateRandomString()}`;
