@@ -122,6 +122,33 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
         }}
       >
         <Form.Item
+          name="recipent-name"
+          label="Recipient's Name"
+          rules={[
+            { required: true, message: "Please input the recipient's name!" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="recipient-address"
+          label="Recipient's Address"
+          rules={[
+            { required: true, message: "Please input the recipicent address!" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="recipientPhoneNumber"
+          label="Recipient's Phone Number"
+          rules={[
+            { required: true, message: "Please input the phone number!" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
           name="name"
           label="Package Name"
           rules={[

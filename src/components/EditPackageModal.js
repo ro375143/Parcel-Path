@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { Modal, Form, Input, Select, DatePicker, InputNumber } from "antd";
 import dayjs from "dayjs";
 
-
 const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
   const [form] = Form.useForm();
 
@@ -83,6 +82,7 @@ const EditPackageModal = ({ isOpen, onClose, packageData, onSave }) => {
         >
           <Select>
             <Select.Option value="Pending">Pending</Select.Option>
+            <Select.Option value="Delayed">Delayed</Select.Option>
             <Select.Option value="In Transit">In Transit</Select.Option>
             <Select.Option value="Delivered">Delivered</Select.Option>
           </Select>

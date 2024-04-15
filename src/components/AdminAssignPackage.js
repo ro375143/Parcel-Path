@@ -96,7 +96,12 @@ export default function AdminAssignPackage() {
         >
           {drivers.map((driver) => (
             <Select.Option key={driver.id} value={driver.id}>
-              {driver.username || "Unnamed Driver"}
+              {"(" +
+                driver.username +
+                ") " +
+                driver.firstName +
+                " " +
+                driver.lastName || "Unnamed Driver"}
             </Select.Option>
           ))}
         </Select>

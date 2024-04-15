@@ -109,7 +109,7 @@ const DriverItinerary = ({ driverId }) => {
   const handleUpdateModalOk = async () => {
     await updateDoc(doc(db, "packages", selectedPackage.id), {
       status,
-      location: arrayUnion({ geopoint, timeStamp: timestamp }),
+      location: arrayUnion({ status: status, geopoint, timeStamp: timestamp }),
     });
     message.success(`Package ${selectedPackage.name} updated!`);
     setUpdateModalVisible(false);
