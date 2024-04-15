@@ -37,7 +37,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
   };
 
   async function addressToCoordinates(address) {
-    const apiKey = "API_KEY";
+    const apiKey = "API_Key";
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
 
     try {
@@ -174,6 +174,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
           rules={[{ required: true, message: "Please select a status!" }]}
         >
           <Select>
+            <Select.Option value="Delayed">Delayed</Select.Option>
             <Select.Option value="Pending">Pending</Select.Option>
             <Select.Option value="In Transit">In Transit</Select.Option>
             <Select.Option value="Delivered">Delivered</Select.Option>

@@ -5,6 +5,7 @@ import { Modal, Button, List } from "antd";
 import QRCode from "qrcode.react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import styles from "./PackageGrid.module.css";
 
 const PackageQRCodeModal = () => {
   const [packages, setPackages] = useState([]);
@@ -39,23 +40,29 @@ const PackageQRCodeModal = () => {
 
   const downloadQRCodeAsPDF = () => {
     const input = document.getElementById("qrCode"); // Ensure your QR code has this ID
-    html2canvas(input).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
+    html2canvas(input)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
         const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
+          orientation: "portrait",
+          unit: "px",
+          format: [canvas.width, canvas.height],
         });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`${selectedPackage?.trackingNumber || 'package'}-qr-code.pdf`);
-    }).catch(err => {
-        console.error('Failed to download PDF:', err);
-    });
+        pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+        pdf.save(`${selectedPackage?.trackingNumber || "package"}-qr-code.pdf`);
+      })
+      .catch((err) => {
+        console.error("Failed to download PDF:", err);
+      });
   };
 
   return (
     <div>
-      <Button type="primary" onClick={handleOpenModal}>
+      <Button
+        type="primary"
+        onClick={handleOpenModal}
+        className={styles.actionButton}
+      >
         Select Package
       </Button>
       <Modal
@@ -75,7 +82,7 @@ const PackageQRCodeModal = () => {
         ]}
       >
         {selectedPackage ? (
-          <div id="qrCode" style={{ textAlign: 'center' }}>
+          <div id="qrCode" style={{ textAlign: "center" }}>
             <QRCode value={selectedPackage.trackingNumber} />
           </div>
         ) : (

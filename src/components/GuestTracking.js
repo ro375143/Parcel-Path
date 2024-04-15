@@ -58,12 +58,6 @@ const GuestPackageTracking = () => {
         {packageInfo ? (
           <ul>
             <li>
-              <strong>Package Name:</strong> {packageInfo.name}
-            </li>
-            <li>
-              <strong>Description:</strong> {packageInfo.description}
-            </li>
-            <li>
               <strong>Status:</strong> {packageInfo.status}
             </li>
             <li>

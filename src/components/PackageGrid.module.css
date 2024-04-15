@@ -13,6 +13,33 @@
 }
 
 .actionButton {
+    margin: 0 8px;
+    /* Adjust spacing around buttons */
+    display: inline-flex;
+    /* Align the button text and icon */
+    align-items: center;
+    /* Center items vertically */
+    background-color: #154734;
+    /* Set background color */
+    color: white;
+    /* Set text color */
+    border: none;
+    /* Remove border */
+    cursor: pointer;
+    /* Change cursor to pointer */
+    padding: 8px 16px;
+    /* Adjust padding */
+    border-radius: 4px;
+    /* Add border radius for rounded corners */
+    transition: background-color 0.3s;
+    /* Add transition for smooth color change */
+}
+
+.actionButton:hover {
+    background-color: #0e2d26;
+    /* Change background color on hover */
+}
+.searchButton {
     margin: 0 8px; /* Adjust spacing around buttons */
     display: inline-flex; /* Align the button text and icon */
     align-items: center; /* Center items vertically */

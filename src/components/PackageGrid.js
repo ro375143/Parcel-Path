@@ -268,7 +268,7 @@ const PackagesGrid = () => {
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col>
           <Input.Search
-            className="search-input"
+            className={styles.searchButton} // Apply the same class as buttons
             placeholder="Search packages..."
             onSearch={handleSearch}
             value={searchValue}
@@ -301,6 +301,7 @@ const PackagesGrid = () => {
           <PackageQRCodeModal />
         </Col>
       </Row>
+
       <div>
         <AgGridReact
           rowData={filteredData}

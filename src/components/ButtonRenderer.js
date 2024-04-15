@@ -1,10 +1,10 @@
-import React from 'react';
-import { Button } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import React from "react";
+import { Button } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const ButtonRenderer = ({ params, onEdit, onDelete }) => {
   return (
-    <div style={{ display: 'flex', gap: '8px' }}>
+    <div style={{ display: "flex", gap: "8px" }}>
       <Button
         type="primary"
         icon={<EditOutlined />}

@@ -9,6 +9,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { Modal, Select, Button, message } from "antd"; // Import the message component
+import styles from "./PackageGrid.module.css";
 
 export default function AdminAssignPackage() {
   const [drivers, setDrivers] = useState([]);
@@ -72,7 +73,11 @@ export default function AdminAssignPackage() {
 
   return (
     <>
-      <Button type="primary" onClick={showModal}>
+      <Button
+        type="primary"
+        onClick={showModal}
+        className={styles.actionButton}
+      >
         Assign Package to Driver
       </Button>
       <Modal

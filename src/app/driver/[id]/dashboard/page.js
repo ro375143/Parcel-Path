@@ -47,14 +47,32 @@ const DriversPage = () => {
 
   return (
     <div>
-      <h1 className={styles.pageTitle}>Driver Dashboard</h1>
+      <h1
+        className={styles.pageTitle}
+        style={{
+          border: "2px solid #154734",
+          borderRadius: "10px",
+          padding: "10px",
+          width: "1000px",
+          marginTop: "50px",
+          marginLeft: "auto",
+          marginBottom: "1px",
+          marginRight: "auto",
+          backgroundColor: "#154734",
+          color: "white", // Adjust the value as needed for a bigger top margin
+        }}
+      >
+        Driver Dashboard
+      </h1>
       <div className={`ag-theme-alpine ${styles.dashboardContainer}`}>
         {isLoading ? (
           <p>Loading...</p>
         ) : userRole === "driver" && userId ? (
           <DriverItinerary driverId={userId} />
         ) : (
-          <p>You do not have access to this page or you are not signed in.</p>
+          <div className={styles.centeredMessage}>
+            <p>You must be an authenticated driver to access this page!</p>
+          </div>
         )}
       </div>
     </div>

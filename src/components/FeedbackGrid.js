@@ -79,7 +79,7 @@ const FeedbackGrid = () => {
     columns = [
       { headerName: "Feedback ID", field: "id", flex: 1 },
       { headerName: "Customer ID", field: "customerId", flex: 1 },
-      { headerName: "Feedback", field: "content", flex: 1 },
+      { headerName: "Feedback", field: "description", flex: 1 },
       {
         headerName: "Feedback Date",
         field: "createdAt",
@@ -113,7 +113,7 @@ const FeedbackGrid = () => {
     columns = [
       { headerName: "Feedback ID", field: "id", flex: 1 },
       { headerName: "Admin ID", field: "adminId", flex: 1 },
-      { headerName: "Feedback", field: "content", flex: 1 },
+      { headerName: "Feedback", field: "description", flex: 1 },
       {
         headerName: "Feedback Date",
         field: "createdAt",
@@ -149,7 +149,7 @@ const FeedbackGrid = () => {
       { headerName: "Feedback ID", field: "id", flex: 1 },
       { headerName: "Admin ID", field: "adminId", flex: 1 },
       { headerName: "Customer ID", field: "customerId", flex: 1 },
-      { headerName: "Feedback", field: "content", flex: 1 },
+      { headerName: "Feedback", field: "description", flex: 1 },
       {
         headerName: "Feedback Date",
         field: "createdAt",
@@ -315,7 +315,7 @@ const FeedbackGrid = () => {
           <Form.Item label="Feedback">
             <textarea
               className="feedback-textarea"
-              value={currentFeedback?.content}
+              value={currentFeedback?.description}
               disabled
             />
           </Form.Item>

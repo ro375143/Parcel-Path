@@ -1,58 +1,17 @@
 "use client";
 import { useState } from "react";
+import { sendPasswordResetEmail } from "firebase/auth"; // Import signOut
+import { auth } from "@/app/firebase/config";
+import { message } from "antd";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth"; // Import signOut
-import { auth, db } from "@/app/firebase/config";
-import { doc, getDoc } from "firebase/firestore";
 
-export default function AdminSignin() {
-  const router = useRouter();
+export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const router = new useRouter();
 
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-
-    if (!email || !password) {
-      setErrorMessage("Please enter both email and password.");
-      return;
-    }
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const uid = userCredential.user.uid;
-
-      // Check the user's role in Firestore
-      const userDocRef = doc(db, "users", uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists() && userDocSnap.data().role === "admin") {
-        // Redirect to the admin dashboard
-        router.push(`/admin/${uid}/dashboard`);
-      } else {
-        // If the role is not 'admin', sign the user out and show an error message
-        await signOut(auth); // Immediately sign the user out
-        setErrorMessage("Access denied. Only administrators can sign in here.");
-      }
-    } catch (error) {
-      console.error("Error signing in:", error);
-      switch (error.code) {
-        case "auth/user-not-found":
-          setErrorMessage("No user found with this email. Please sign up.");
-          break;
-        case "auth/wrong-password":
-          setErrorMessage("Incorrect password. Please try again.");
-          break;
-        default:
-          setErrorMessage("Failed to sign in. Please try again.");
-          break;
-      }
-    }
+  const resetEmail = () => {
+    sendPasswordResetEmail(auth, email);
+    message.success("Password Reset Email Has Been Sent!", 10);
   };
 
   return (
@@ -92,14 +51,14 @@ export default function AdminSignin() {
                   style={{ backgroundColor: "#345454" }}
                 >
                   <h2 className="text-2xl font-bold leading-1 tracking-tight text-white">
-                    Admin Login
+                    Forgot Password
                   </h2>
                 </div>
               </div>
             </div>
 
             <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-md">
-              <form onSubmit={handleSignIn} className="space-y-6">
+              <form className="space-y-6">
                 <div>
                   <label
                     htmlFor="email"
@@ -122,53 +81,9 @@ export default function AdminSignin() {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium leading-6 text-white"
-                    >
-                      Password
-                    </label>
-                    <div className="text-sm">
-                      <div
-                        onClick={() => router.push("/forgot-password")}
-                        className="cursor-pointer font-bold text-indigo-400 hover:text-indigo-300"
-                        style={{ color: "#345454" }}
-                      >
-                        Forgot password?
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Error Message */}
-                {errorMessage && (
-                  <div className="text-sm text-red-500 font-bold">
-                    {errorMessage}
-                    {errorMessage.includes("No user found") && (
-                      <button onClick={() => router.push("../register/admin")}>
-                        Sign up
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                <div>
                   <button
-                    type="submit"
-                    disabled={!email || !password}
+                    onClick={() => resetEmail()}
+                    disabled={!email}
                     className="disabled:opacity-40 flex w-full shadow-2xl justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     style={{
                       backgroundColor: "#345454",
@@ -181,7 +96,7 @@ export default function AdminSignin() {
                       (e.target.style.backgroundColor = "#345454")
                     }
                   >
-                    Sign in
+                    Send Forgot Password email
                   </button>
                 </div>
               </form>

@@ -36,6 +36,7 @@ const CustomerPackagesGrid = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [locationData, setLocationData] = useState(null);
   const [userRole, setRole] = useState(null);
+  const [cityState, setCityState] = useState(null);
 
   const handleFeedbackClick = (packageData) => {
     setSelectedPackage(packageData);
@@ -160,7 +161,22 @@ const CustomerPackagesGrid = () => {
       if (packageDocSnap.exists()) {
         const location = packageDocSnap.data().location;
 
-        setLocationData(location);
+        const cityStatePromises = location.map((loc) =>
+          getCityState(loc.geopoint?.latitude, loc.geopoint?.longitude)
+        );
+
+        Promise.all(cityStatePromises)
+          .then((cityStateArray) => {
+            const locationDataWithCityState = location.map((loc, index) => ({
+              ...loc,
+              cityState: cityStateArray[index],
+            }));
+            setLocationData(locationDataWithCityState);
+          })
+          .catch((error) => {
+            console.error("Error fetching city and state information:", error);
+            setLocationData(null);
+          });
 
         setIsLocationModalOpen(true);
       } else {
@@ -170,34 +186,43 @@ const CustomerPackagesGrid = () => {
       console.error("Error fetching location data:", error);
     }
   };
-  const getReverseGeocode = async (latitude, longitude) => {
-    try {
-      const apiKey = "API_KEY";
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
-      );
-      const data = await response.json();
-      if (data.status === "OK" && data.results.length > 0) {
-        const addressComponents = data.results[0].address_components;
-        const city = addressComponents.find((component) =>
-          component.types.includes("locality")
-        );
-        const state = addressComponents.find((component) =>
-          component.types.includes("administrative_area_level_1")
-        );
-        if (city && state) {
-          return `${city.long_name}, ${state.short_name}`;
-        } else {
-          throw new Error("City and state not found in address components");
-        }
-      } else {
-        throw new Error("Reverse geocoding failed");
-      }
-    } catch (error) {
-      console.error("Error performing reverse geocoding:", error);
-      return null;
+  useEffect(() => {
+    if (locationData) {
+      locationData.forEach((location) => {
+        getCityState(location.geopoint?.latitude, location.geopoint?.longitude);
+      });
     }
-  };
+  }, [locationData]);
+  function getCityState(lat, lng) {
+    const apiKey = "API_KEY";
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+
+    return fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "OK") {
+          const components = data.results[0].address_components;
+          const city = components.find((component) =>
+            component.types.includes("locality")
+          );
+          const state = components.find((component) =>
+            component.types.includes("administrative_area_level_1")
+          );
+          if (city && state) {
+            return `${city.long_name}, ${state.short_name}`;
+          } else {
+            return null;
+          }
+        } else {
+          console.error("Unable to retrieve city and state information.");
+          return null;
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        return null;
+      });
+  }
 
   const fetchRole = async (userId) => {
     const uid = userId.uid;
@@ -301,7 +326,7 @@ const CustomerPackagesGrid = () => {
   const submitFeedback = async () => {
     if (!selectedPackage) return;
 
-    const feedbackRef = doc(collection(db, "feedback"));
+    const feedbackRef = doc(collection(db, "Feedback"));
     await setDoc(feedbackRef, {
       customerId: user.uid,
       packageId: selectedPackage.id,
@@ -355,7 +380,7 @@ const CustomerPackagesGrid = () => {
 
       <Modal
         title="Track a Package"
-        visible={isTrackingModalOpen}
+        open={isTrackingModalOpen}
         onOk={trackPackage}
         onCancel={() => setIsTrackingModalOpen(false)}
         okText="Track"
@@ -386,34 +411,26 @@ const CustomerPackagesGrid = () => {
       </Modal>
       <Modal
         title="Tracking Package"
-        visible={isLocationModalOpen}
+        open={isLocationModalOpen}
         onCancel={() => setIsLocationModalOpen(false)}
         footer={null}
       >
-        {/* Display location data in the modal */}
         {locationData && (
           <div>
             <ul>
-              {locationData.map((locationMap, index) => (
+              {locationData.map((location, index) => (
                 <li key={index}>
                   <p>
-                    Timestamp:{" "}
-                    {new Date(
-                      locationMap.timeStamp.seconds * 1000
-                    ).toLocaleString()}
+                    Timestamp: {new Date(location.timeStamp).toLocaleString()}
                   </p>
                   <div style={{ marginLeft: "20px" }}>
                     <p>
-                      Latitude: {locationMap.point?.latitude} Longitude:{" "}
-                      {locationMap.point?.longitude}
+                      Latitude: {location.geopoint?.latitude} Longitude:{" "}
+                      {location.geopoint?.longitude}
                     </p>
-                    <p>
-                      City, State:{" "}
-                      {getReverseGeocode(
-                        locationMap.point?.latitude,
-                        locationMap.point?.longitude
-                      )}
-                    </p>
+                    {location.cityState && (
+                      <p>City, State: {location.cityState}</p>
+                    )}
                   </div>
                 </li>
               ))}
