@@ -17,7 +17,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@types/react": "^18.2.74",
     "@types/react-dom": "^18.2.24",
-    "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
+    "@yudiel/react-qr-scanner": "^1.2.10",
     "ag-grid-community": "^31.1.1",
     "ag-grid-react": "^31.1.1",
     "antd": "^5.16.0",
@@ -36,7 +36,8 @@
     "next-auth": "^4.24.7",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
