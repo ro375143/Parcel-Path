@@ -9,6 +9,7 @@ import {
   DatePicker,
   InputNumber,
   message,
+  Checkbox,
 } from "antd";
 import { db, auth } from "@/app/firebase/config";
 import {
@@ -18,7 +19,10 @@ import {
   Timestamp,
   doc,
   getDoc,
+  getDocs,
   GeoPoint,
+  where,
+  query,
 } from "firebase/firestore";
 
 const CreatePackageModal = ({ isOpen, onClose }) => {
@@ -64,38 +68,63 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = async () => {
     try {
+      const values = await form.validateFields();
+      let assignedDriverId = null;
+      let driverAssigned = false;
+
+      // Check if the auto-assign driver option is checked
+      if (values.autoAssignDriver) {
+        // Fetch all drivers
+        const driverQuery = query(
+          collection(db, "users"),
+          where("role", "==", "driver")
+        );
+        const driversSnapshot = await getDocs(driverQuery);
+        const drivers = driversSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        if (drivers.length > 0) {
+          const randomIndex = Math.floor(Math.random() * drivers.length);
+          assignedDriverId = drivers[randomIndex].id;
+          driverAssigned = true;
+        } else {
+          throw new Error("No drivers available for assignment.");
+        }
+      }
+
       const userRef = doc(db, "users", auth.currentUser.uid);
       const userDoc = await getDoc(userRef);
       const { street, city, state } = userDoc.data().address;
       const address = `${street}, ${city}, ${state}, USA`;
-      console.log(address);
-      const values = await form.validateFields();
-      const packageWeightNumber = parseFloat(values.packageWeight);
-      const trackingNumber = `PKG-${Date.now()}-${generateRandomString()}`;
       const coordinates = await addressToCoordinates(address);
       const geopoint = new GeoPoint(
         coordinates.latitude,
         coordinates.longitude
       );
-
       const deliveryDate = values.deliveryDate
         ? Timestamp.fromDate(values.deliveryDate.toDate())
         : null;
+      const packageWeightNumber = parseFloat(values.packageWeight);
+      const trackingNumber = `PKG-${Date.now()}-${generateRandomString()}`;
 
+      // Assemble the package data
       const packageData = {
         ...values,
         packageWeight: packageWeightNumber,
         deliveryDate,
         shipDate: serverTimestamp(),
         trackingNumber,
-        driverAssigned: false,
-        assignedDriverId: null,
+        driverAssigned,
+        assignedDriverId,
         adminId: auth.currentUser.uid,
         location: [
           { status: values.status, geopoint, timeStamp: new Date().toString() },
         ],
       };
 
+      // Add the package to the database
       await addDoc(collection(db, "packages"), packageData);
       message.success("Package created successfully!");
       form.resetFields();
@@ -180,6 +209,12 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
             <Select.Option value="In Transit">In Transit</Select.Option>
             <Select.Option value="Delivered">Delivered</Select.Option>
           </Select>
+        </Form.Item>
+        <Form.Item
+          name="autoAssignDriver"
+          valuePropName="checked" // Ensures the form field is controlled by the checkbox's checked state
+        >
+          <Checkbox>Auto-assign driver</Checkbox>
         </Form.Item>
       </Form>
     </Modal>
