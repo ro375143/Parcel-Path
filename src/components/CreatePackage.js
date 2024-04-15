@@ -37,7 +37,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
   };
 
   async function addressToCoordinates(address) {
-    const apiKey = "API_Key";
+    const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
 
     try {
@@ -88,10 +88,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
         assignedDriverId: null,
         adminId: auth.currentUser.uid,
         location: [
-          {
-            geopoint,
-            timeStamp: new Date().toString(),
-          },
+          { status: values.status, geopoint, timeStamp: new Date().toString() },
         ],
       };
 

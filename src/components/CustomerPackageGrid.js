@@ -194,7 +194,7 @@ const CustomerPackagesGrid = () => {
     }
   }, [locationData]);
   function getCityState(lat, lng) {
-    const apiKey = "API_KEY";
+    const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
     return fetch(url)
@@ -421,8 +421,10 @@ const CustomerPackagesGrid = () => {
               {locationData.map((location, index) => (
                 <li key={index}>
                   <p>
-                    Timestamp: {new Date(location.timeStamp).toLocaleString()}
-                  </p>
+                    <strong>
+                      Timestamp: {new Date(location.timeStamp).toLocaleString()}
+                    </strong>
+                  </p>{" "}
                   <div style={{ marginLeft: "20px" }}>
                     <p>
                       Latitude: {location.geopoint?.latitude} Longitude:{" "}
@@ -431,6 +433,7 @@ const CustomerPackagesGrid = () => {
                     {location.cityState && (
                       <p>City, State: {location.cityState}</p>
                     )}
+                    <p>Status: {location.status}</p>
                   </div>
                 </li>
               ))}
