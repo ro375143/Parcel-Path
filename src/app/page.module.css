@@ -4,7 +4,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 75vh;
+  height: 85vh;
+  background-image: url(C:\Users\emmaw\OneDrive\Documents\GitHub\Parcel-Path\src\app\bgphoto.png); /* Specify the path to your background image */
+  background-size: cover; /* Cover the entire container with the background image */
+  background-position: center; /* Center the background image */
 }
 
 .content {
@@ -63,4 +66,24 @@
 
 .registerBusinessButton:hover {
   background-color: #205b41; /* Darker green */
+}
+
+.pitch {
+  margin-top: 40px; /* Add space between slogan and pitch */
+  text-align: center; /* Center align the pitch text */
+}
+
+.pitchText {
+  font-size: 28px; /* Set the font size */
+  color: #154734; /* Dark green */
+}
+
+.line {
+  margin-top: 10px; /* Add space between slogan and pitch */
+  text-align: center; /* Center align the pitch text */
+}
+
+.lineText {
+  font-size: 28px; /* Set the font size */
+  color: #154734; /* Dark green */
 }
