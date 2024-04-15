@@ -172,7 +172,7 @@ const CustomerPackagesGrid = () => {
   };
   const getReverseGeocode = async (latitude, longitude) => {
     try {
-      const apiKey = "AIzaSyC5HYJJRCJtLhekb51j8LA_5n596TwAM9M";
+      const apiKey = "API_KEY";
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
       );

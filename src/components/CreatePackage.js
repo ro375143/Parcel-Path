@@ -37,7 +37,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
   };
 
   async function addressToCoordinates(address) {
-    const apiKey = "AIzaSyANIaV2VMUDxZnKsxqCiGZd7EnCYNyOvgc";
+    const apiKey = "API_KEY";
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
 
     try {
