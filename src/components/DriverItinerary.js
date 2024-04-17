@@ -208,6 +208,25 @@ const DriverItinerary = ({ driverId }) => {
     getCurrentPosition();
     setTimestamp(new Date().toString()); // Set timestamp to current date and time
   }, []);
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
+    // Fetch street address for each item
+    itineraryPackages.forEach((item) => {
+      const { latitude, longitude } =
+        item.location[item.location.length - 1].geopoint;
+      fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          const address = data.results[0].formatted_address;
+          // Update the DOM with the address
+          document.getElementById(`pickup-address-${item.id}`).textContent =
+            address;
+        })
+        .catch((error) => console.error("Error fetching address:", error));
+    });
+  }, [itineraryPackages]);
 
   return (
     <Card
@@ -251,9 +270,32 @@ const DriverItinerary = ({ driverId }) => {
                       <Text strong>{item.name}</Text>
                       <p>Recipient Name: {item.recipientName}</p>{" "}
                       <p>
+                        {item.location.length > 0 &&
+                        item.location[item.location.length - 1].geopoint ? (
+                          <span>
+                            Pick Up Address:{" "}
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                `${item.location[item.location.length - 1].geopoint.latitude},${item.location[item.location.length - 1].geopoint.longitude}`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <span id={`pickup-address-${item.id}`}>
+                                Loading...
+                              </span>
+                            </a>
+                          </span>
+                        ) : (
+                          "Not available"
+                        )}
+                      </p>
+                      <p>
                         Destination:{" "}
                         <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.recipientAddress)}`}
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            item.recipientAddress
+                          )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

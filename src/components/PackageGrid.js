@@ -42,6 +42,7 @@ const PackagesGrid = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [userRole, setRole] = useState(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const [locationData, setLocationData] = useState(null);
   const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
 
@@ -206,7 +207,7 @@ const PackagesGrid = () => {
 
   const deletePackageFromFirestore = async (id) => {
     await deleteDoc(doc(db, "packages", id));
-    fetchPackages();
+    fetchPackages(user.uid);
   };
 
   const openEditModal = (packageData) => {
@@ -225,7 +226,7 @@ const PackagesGrid = () => {
 
   const closeCreateModal = () => {
     setIsCreateModalOpen(false);
-    fetchPackages(); // Optionally fetch packages again to reflect the newly added package
+    fetchPackages(user.uid); // Optionally fetch packages again to reflect the newly added package
   };
 
   const savePackage = async (id, updatedData) => {
@@ -248,7 +249,7 @@ const PackagesGrid = () => {
     try {
       await updateDoc(packageRef, dataWithFirestoreTimestamp);
       console.log("Package updated successfully");
-      fetchPackages();
+      fetchPackages(user.uid);
     } catch (error) {
       console.error("Error updating package:", error);
     }
@@ -285,10 +286,11 @@ const PackagesGrid = () => {
       });
   }
   useEffect(() => {
-    fetchPackages();
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         fetchRole(currentUser);
+        setUser(currentUser);
+        fetchPackages(currentUser.uid);
       } else {
         setUser(null);
       }
@@ -303,15 +305,21 @@ const PackagesGrid = () => {
     }
   }, [locationData]);
 
-  const fetchPackages = async () => {
+  const fetchPackages = async (currentUserUid) => {
     try {
       const querySnapshot = await getDocs(collection(db, "packages"));
       const packagesArray = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setRowData(packagesArray);
-      setFilteredData(packagesArray); // Make sure to set filteredData as well
+
+      // Filter packages where adminId matches currentUserUid
+      const filteredPackages = packagesArray.filter(
+        (rowData) => rowData.adminId === currentUserUid
+      );
+
+      setRowData(filteredPackages);
+      setFilteredData(filteredPackages); // Make sure to set filteredData as well
     } catch (error) {
       console.error("Error fetching packages:", error);
     }
