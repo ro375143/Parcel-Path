@@ -21,7 +21,12 @@ import { onAuthStateChanged } from "firebase/auth";
 import styles from "./PackageGrid.module.css";
 import FeedbackButtonRenderer from "./FeedbackButtonRenderer";
 import TrackButtonRenderer from "./TrackButtonRenderer";
-import { GoogleMap, LoadScript, Polyline } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  LoadScript,
+  Polyline,
+  Marker,
+} from "@react-google-maps/api";
 
 const CustomerPackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -342,9 +347,17 @@ const CustomerPackagesGrid = () => {
       adminId: selectedPackage.adminId,
     });
 
+    // Set isFeedback to true in the selectedPackage object
+    const updatedSelectedPackage = { ...selectedPackage, isFeedback: true };
+
+    // Update the Firestore document with the new isFeedback value
+    const packageDocRef = doc(db, "packages", selectedPackage.id);
+    await updateDoc(packageDocRef, { isFeedback: true });
+
     setIsFeedbackModalOpen(false);
     setFeedbackDescription("");
     setIsSatisfied(false);
+    fetchTrackedPackages(user.uid);
   };
 
   const handleSatisfactionChange = (e) => {
@@ -415,60 +428,104 @@ const CustomerPackagesGrid = () => {
         </Checkbox>
       </Modal>
       <Modal
-        title="Tracking Package"
+        title={
+          <div
+            style={{
+              backgroundColor: "#154734",
+              color: "white",
+              padding: "10px 15px",
+              borderRadius: "15px",
+            }}
+          >
+            TRACKING PACKAGE
+          </div>
+        }
         open={isLocationModalOpen}
         onCancel={() => setIsLocationModalOpen(false)}
         footer={null}
         width={800} // Adjust width to fit the map
+        closeIcon={
+          <span
+            style={{
+              backgroundColor: "white",
+              borderRadius: "2%",
+              position: "relative",
+              top: "13px",
+              borderRadius: "12px",
+              padding: "1px 13.5px",
+              right: "20px",
+            }}
+          >
+            X
+          </span>
+        }
       >
         {locationData && (
-          <>
-            <LoadScript googleMapsApiKey={apiKey}>
-              <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "400px" }}
-                center={
-                  locationData.length > 0
-                    ? {
-                        lat: locationData[0].geopoint.latitude,
-                        lng: locationData[0].geopoint.longitude,
-                      }
-                    : { lat: 0, lng: 0 }
-                }
-                zoom={10}
-              >
-                <Polyline
-                  path={locationData.map((loc) => ({
-                    lat: loc.geopoint.latitude,
-                    lng: loc.geopoint.longitude,
-                  }))}
-                  options={{
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#FF0000",
-                    fillOpacity: 0.35,
-                  }}
-                />
-              </GoogleMap>
-            </LoadScript>
-            <ul>
-              {locationData.map((location, index) => (
-                <li key={index}>
-                  <strong>
-                    Timestamp: {new Date(location.timeStamp).toLocaleString()}
-                  </strong>
-                  <p>
-                    Latitude: {location.geopoint.latitude}, Longitude:{" "}
-                    {location.geopoint.longitude}
-                  </p>
-                  {location.cityState && (
-                    <p>City, State: {location.cityState}</p>
-                  )}
-                  <p>Status: {location.status}</p>
-                </li>
-              ))}
-            </ul>
-          </>
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <ul>
+                {locationData.map((location, index) => (
+                  <li key={index}>
+                    <strong>
+                      Timestamp: {new Date(location.timeStamp).toLocaleString()}
+                    </strong>
+                    <p>
+                      Latitude: {location.geopoint.latitude.toFixed(7)},
+                      Longitude: {location.geopoint.longitude.toFixed(7)}
+                    </p>
+                    {location.cityState && (
+                      <p>City, State: {location.cityState}</p>
+                    )}
+                    <p>Status: {location.status}</p>
+                  </li>
+                ))}
+              </ul>
+            </Col>
+            <Col span={12}>
+              <LoadScript googleMapsApiKey={apiKey}>
+                <div style={{ borderRadius: "10px", overflow: "hidden" }}>
+                  <GoogleMap
+                    mapContainerStyle={{ width: "100%", height: "400px" }}
+                    center={
+                      locationData.length > 0
+                        ? {
+                            lat: locationData[locationData.length - 1].geopoint
+                              .latitude,
+                            lng: locationData[locationData.length - 1].geopoint
+                              .longitude,
+                          }
+                        : { lat: 0, lng: 0 }
+                    }
+                    zoom={10}
+                  >
+                    <Polyline
+                      path={locationData.map((loc) => ({
+                        lat: loc.geopoint.latitude,
+                        lng: loc.geopoint.longitude,
+                      }))}
+                      options={{
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: "#FF0000",
+                        fillOpacity: 0.35,
+                      }}
+                    />
+                    {locationData && (
+                      <Marker
+                        position={{
+                          lat: locationData[locationData.length - 1].geopoint
+                            .latitude,
+                          lng: locationData[locationData.length - 1].geopoint
+                            .longitude,
+                        }}
+                      />
+                    )}
+                  </GoogleMap>
+                </div>
+              </LoadScript>
+            </Col>
+          </Row>
         )}
       </Modal>
     </div>

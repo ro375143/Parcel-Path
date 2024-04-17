@@ -4,13 +4,14 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import styles from "./PackageGrid.module.css";
-import { db } from "@/app/firebase/config";
+import { db, auth } from "@/app/firebase/config";
 import {
   collection,
   getDocs,
   doc,
   updateDoc,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import EditPackageModal from "./EditPackageModal";
 import CreatePackageModal from "./CreatePackage";
@@ -24,6 +25,13 @@ import { json2csv } from "json-2-csv";
 import moment from "moment";
 import AdminAssignPackage from "@/components/AdminAssignPackage";
 import PackageQRCodeModal from "@/components/PackageQRCodeModal";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  GoogleMap,
+  LoadScript,
+  Polyline,
+  Marker,
+} from "@react-google-maps/api";
 
 const PackagesGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -32,6 +40,10 @@ const PackagesGrid = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // New state for create modal visibility
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+  const [userRole, setRole] = useState(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [locationData, setLocationData] = useState(null);
+  const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
 
   const columns = [
     { headerName: "ID", field: "id", flex: 1, minWidth: 100, maxWidth: 300 },
@@ -111,21 +123,57 @@ const PackagesGrid = () => {
       headerName: "Actions",
       field: "id",
       flex: 1,
-      minWidth: 210, // Specific width for actions column
-      maxWidth: 210,
+      minWidth: 260, // Specific width for actions column
+      maxWidth: 260,
       pinned: "right",
       lockedPinned: true,
       suppressMovable: true,
       cellRenderer: (params) => (
-        <ButtonRenderer
-          params={params}
-          onEdit={editPackage}
-          onDelete={deletePackage}
-        />
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <ButtonRenderer
+            params={params}
+            onEdit={editPackage}
+            onDelete={deletePackage}
+            userRole={userRole}
+            viewLocation={viewLocation}
+          />
+        </div>
       ),
     },
   ];
+  const viewLocation = async (rowData) => {
+    try {
+      const packageDocRef = doc(db, "packages", rowData.id);
+      const packageDocSnap = await getDoc(packageDocRef);
 
+      if (packageDocSnap.exists()) {
+        const location = packageDocSnap.data().location;
+
+        const cityStatePromises = location.map((loc) =>
+          getCityState(loc.geopoint?.latitude, loc.geopoint?.longitude)
+        );
+
+        Promise.all(cityStatePromises)
+          .then((cityStateArray) => {
+            const locationDataWithCityState = location.map((loc, index) => ({
+              ...loc,
+              cityState: cityStateArray[index],
+            }));
+            setLocationData(locationDataWithCityState);
+          })
+          .catch((error) => {
+            console.error("Error fetching city and state information:", error);
+            setLocationData(null);
+          });
+
+        setIsLocationModalOpen(true);
+      } else {
+        console.log("Package document does not exist");
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
+  };
   const editPackage = (id) => {
     const packageData = rowData.find((p) => p.id === id);
     openEditModal(packageData);
@@ -145,6 +193,15 @@ const PackagesGrid = () => {
         console.log("Cancel delete");
       },
     });
+  };
+  const fetchRole = async (userId) => {
+    const uid = userId.uid;
+    const userRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      setRole(userDoc.data().role);
+    }
   };
 
   const deletePackageFromFirestore = async (id) => {
@@ -196,10 +253,55 @@ const PackagesGrid = () => {
       console.error("Error updating package:", error);
     }
   };
+  function getCityState(lat, lng) {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
+    return fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "OK") {
+          const components = data.results[0].address_components;
+          const city = components.find((component) =>
+            component.types.includes("locality")
+          );
+
+          const state = components.find((component) =>
+            component.types.includes("administrative_area_level_1")
+          );
+
+          if (city && state) {
+            return `${city.long_name}, ${state.short_name}`;
+          } else {
+            return null;
+          }
+        } else {
+          console.error("Unable to retrieve city and state information.");
+          return null;
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        return null;
+      });
+  }
   useEffect(() => {
     fetchPackages();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        fetchRole(currentUser);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
   }, []);
+  useEffect(() => {
+    if (locationData) {
+      locationData.forEach((location) => {
+        getCityState(location.geopoint?.latitude, location.geopoint?.longitude);
+      });
+    }
+  }, [locationData]);
 
   const fetchPackages = async () => {
     try {
@@ -264,68 +366,171 @@ const PackagesGrid = () => {
   };
 
   return (
-    <div className={`ag-theme-alpine ${styles.gridContainer}`}>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col>
-          <Input.Search
-            className={styles.searchButton} // Apply the same class as buttons
-            placeholder="Search packages..."
-            onSearch={handleSearch}
-            value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-        </Col>
-        <Col>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={openCreateModal}
-            className={styles.actionButton}
-          >
-            Add Package
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            className={styles.actionButton}
-            type="primary"
-            onClick={exportData}
-          >
-            Export Data
-          </Button>
-        </Col>
-        <Col>
-          <AdminAssignPackage className={styles.actionButton} />
-        </Col>
-        <Col>
-          <PackageQRCodeModal />
-        </Col>
-      </Row>
+    <div>
+      <div className={`ag-theme-alpine ${styles.gridContainer}`}>
+        <Row gutter={16} style={{ marginBottom: 16 }}>
+          <Col>
+            <Input.Search
+              className={styles.searchButton} // Apply the same class as buttons
+              placeholder="Search packages..."
+              onSearch={handleSearch}
+              value={searchValue}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </Col>
+          <Col>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={openCreateModal}
+              className={styles.actionButton}
+            >
+              Add Package
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              className={styles.actionButton}
+              type="primary"
+              onClick={exportData}
+            >
+              Export Data
+            </Button>
+          </Col>
+          <Col>
+            <AdminAssignPackage className={styles.actionButton} />
+          </Col>
+          <Col>
+            <PackageQRCodeModal />
+          </Col>
+        </Row>
 
-      <div>
-        <AgGridReact
-          rowData={filteredData}
-          columnDefs={columns}
-          domLayout="autoHeight"
-          rowHeight={40}
-          enableRangeSelection={true}
-          style={{ borderRadius: "10px", overflow: "hidden" }}
-        />
+        <div>
+          <AgGridReact
+            rowData={filteredData}
+            columnDefs={columns}
+            domLayout="autoHeight"
+            rowHeight={40}
+            enableRangeSelection={true}
+            style={{ borderRadius: "10px", overflow: "hidden" }}
+          />
+        </div>
+        {isEditModalOpen && currentPackage && (
+          <EditPackageModal
+            isOpen={isEditModalOpen}
+            onClose={closeEditModal}
+            packageData={currentPackage}
+            onSave={savePackage}
+          />
+        )}
+        {isCreateModalOpen && (
+          <CreatePackageModal
+            isOpen={isCreateModalOpen}
+            onClose={closeCreateModal}
+          />
+        )}
       </div>
-      {isEditModalOpen && currentPackage && (
-        <EditPackageModal
-          isOpen={isEditModalOpen}
-          onClose={closeEditModal}
-          packageData={currentPackage}
-          onSave={savePackage}
-        />
-      )}
-      {isCreateModalOpen && (
-        <CreatePackageModal
-          isOpen={isCreateModalOpen}
-          onClose={closeCreateModal}
-        />
-      )}
+      <Modal
+        title={
+          <div
+            style={{
+              backgroundColor: "#154734",
+              color: "white",
+              padding: "10px 15px",
+              borderRadius: "15px",
+            }}
+          >
+            TRACKING PACKAGE
+          </div>
+        }
+        open={isLocationModalOpen}
+        onCancel={() => setIsLocationModalOpen(false)}
+        footer={null}
+        width={800} // Adjust width to fit the map
+        closeIcon={
+          <span
+            style={{
+              backgroundColor: "white",
+              borderRadius: "2%",
+              position: "relative",
+              top: "13px",
+              borderRadius: "12px",
+              padding: "1px 13.5px",
+              right: "20px",
+            }}
+          >
+            X
+          </span>
+        }
+      >
+        {locationData && (
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <ul>
+                {locationData.map((location, index) => (
+                  <li key={index}>
+                    <strong>
+                      Timestamp: {new Date(location.timeStamp).toLocaleString()}
+                    </strong>
+                    <p>
+                      Latitude: {location.geopoint.latitude.toFixed(7)},
+                      Longitude: {location.geopoint.longitude.toFixed(7)}
+                    </p>
+                    {location.cityState && (
+                      <p>City, State: {location.cityState}</p>
+                    )}
+                    <p>Status: {location.status}</p>
+                  </li>
+                ))}
+              </ul>
+            </Col>
+            <Col span={12}>
+              <LoadScript googleMapsApiKey={apiKey}>
+                <div style={{ borderRadius: "10px", overflow: "hidden" }}>
+                  <GoogleMap
+                    mapContainerStyle={{ width: "100%", height: "400px" }}
+                    center={
+                      locationData.length > 0
+                        ? {
+                            lat: locationData[locationData.length - 1].geopoint
+                              .latitude,
+                            lng: locationData[locationData.length - 1].geopoint
+                              .longitude,
+                          }
+                        : { lat: 0, lng: 0 }
+                    }
+                    zoom={10}
+                  >
+                    <Polyline
+                      path={locationData.map((loc) => ({
+                        lat: loc.geopoint.latitude,
+                        lng: loc.geopoint.longitude,
+                      }))}
+                      options={{
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: "#FF0000",
+                        fillOpacity: 0.35,
+                      }}
+                    />
+                    {locationData && (
+                      <Marker
+                        position={{
+                          lat: locationData[locationData.length - 1].geopoint
+                            .latitude,
+                          lng: locationData[locationData.length - 1].geopoint
+                            .longitude,
+                        }}
+                      />
+                    )}
+                  </GoogleMap>
+                </div>
+              </LoadScript>
+            </Col>
+          </Row>
+        )}
+      </Modal>
     </div>
   );
 };

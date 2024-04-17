@@ -26,6 +26,7 @@ import {
 } from "antd";
 import moment from "moment";
 import { QrScanner } from "@yudiel/react-qr-scanner";
+import axios from "axios";
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
@@ -69,26 +70,11 @@ const DriverItinerary = ({ driverId }) => {
     setDeliveredPackages(delivered);
   };
 
-  const handleFormSubmit = async () => {
-    const scannedPackage = itineraryPackages.find(
-      (pkg) => pkg.trackingNumber === trackingNumber
-    );
-    if (scannedPackage) {
-      setSelectedPackage(scannedPackage);
-      setIsFormOpen(false);
-      setUpdateModalVisible(true);
-    } else {
-      message.error("Package not found in itinerary.");
-    }
-    setTrackingNumber("");
-  };
-
   const getCurrentPosition = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLatitude(position.coords.latitude);
         setLongitude(position.coords.longitude);
-        setUpdateModalVisible(true); // Move modal open call here after position is set
       },
       (error) => {
         console.error("Error getting current position:", error);
@@ -103,30 +89,119 @@ const DriverItinerary = ({ driverId }) => {
     if (value && !scanResult.length) {
       setScanResult(value);
       setIsScannerOpen(false);
+
       const scannedPackage = itineraryPackages.find(
         (pkg) => pkg.trackingNumber === value
       );
       if (scannedPackage) {
         setSelectedPackage(scannedPackage);
         getCurrentPosition(); // Fetch current position right here
+        setUpdateModalVisible(true); // Set updateModalVisible to true
       } else {
         message.error("Package not found in itinerary.");
       }
+      setScanResult("");
     }
   };
 
   const openScanner = () => setIsScannerOpen(true);
   const closeScanner = () => setIsScannerOpen(false);
 
-  const geopoint = new GeoPoint(latitude, longitude);
+  async function addressToCoordinates(address) {
+    const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
+    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+
+    try {
+      const response = await axios.get(apiUrl);
+      if (
+        response.data &&
+        response.data.results &&
+        response.data.results.length > 0
+      ) {
+        const location = response.data.results[0].geometry.location;
+        return {
+          latitude: location.lat,
+          longitude: location.lng,
+        };
+      } else {
+        throw new Error("No results found for the address.");
+      }
+    } catch (error) {
+      throw new Error("Error geocoding address: " + error.message);
+    }
+  }
+
   const handleUpdateModalOk = async () => {
-    await updateDoc(doc(db, "packages", selectedPackage.id), {
-      status,
-      location: arrayUnion({ status: status, geopoint, timeStamp: timestamp }),
-    });
-    message.success(`Package ${selectedPackage.name} updated!`);
-    setUpdateModalVisible(false);
-    fetchDriverPackages();
+    // Only validate location if status is "Delivered"
+    if (status === "Delivered") {
+      try {
+        const deliveryAddress = selectedPackage.recipientAddress;
+        const { latitude: deliveryLat, longitude: deliveryLon } =
+          await addressToCoordinates(deliveryAddress);
+        console.log(deliveryLon);
+        const distanceToDeliveryAddress = getDistanceFromLatLonInKm(
+          latitude,
+          longitude,
+          deliveryLat,
+          deliveryLon
+        );
+
+        if (distanceToDeliveryAddress <= 2.5) {
+          // Assuming 2.5 km (2500 meters) tolerance for verification
+          await updateDoc(doc(db, "packages", selectedPackage.id), {
+            status,
+            location: arrayUnion({
+              status: status,
+              geopoint: new GeoPoint(latitude, longitude),
+              timeStamp: timestamp,
+            }),
+          });
+          message.success(`Package ${selectedPackage.name} updated!`);
+          setUpdateModalVisible(false);
+          fetchDriverPackages();
+        } else {
+          console.log(distanceToDeliveryAddress);
+          message.error(
+            "Location verification failed. Please check the delivery address."
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        message.error("Error verifying location. Please try again later.");
+      }
+    } else {
+      // Update package status without location verification for statuses other than "Delivered"
+      await updateDoc(doc(db, "packages", selectedPackage.id), {
+        status,
+        location: arrayUnion({
+          status: status,
+          geopoint: new GeoPoint(latitude, longitude),
+          timeStamp: timestamp,
+        }),
+      });
+      message.success(`Package ${selectedPackage.name} updated!`);
+      setUpdateModalVisible(false);
+      fetchDriverPackages();
+    }
+  };
+
+  const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1); // deg2rad below
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+  };
+
+  const deg2rad = (deg) => {
+    return deg * (Math.PI / 180);
   };
 
   useEffect(() => {
@@ -174,9 +249,20 @@ const DriverItinerary = ({ driverId }) => {
                   <List.Item>
                     <Card>
                       <Text strong>{item.name}</Text>
+                      <p>Recipient Name: {item.recipientName}</p>{" "}
+                      <p>
+                        Destination:{" "}
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.recipientAddress)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {item.recipientAddress}
+                        </a>
+                      </p>
                       <p>Delivery Date: {item.deliveryDate}</p>
                       <p>
-                        Ship Date:
+                        Ship Date:{" "}
                         {item.shipDate
                           ? moment(item.shipDate.toDate()).format(
                               "MMMM Do YYYY"
@@ -205,6 +291,8 @@ const DriverItinerary = ({ driverId }) => {
                   <List.Item>
                     <Card>
                       <Text strong>{item.name}</Text>
+                      <p>Recipient Name: {item.recipientName}</p>
+                      <p>Destination Address: {item.recipientAddress}</p>
                       <p>Delivery Date: {item.deliveryDate}</p>
                       <p>
                         Ship Date:
@@ -214,7 +302,7 @@ const DriverItinerary = ({ driverId }) => {
                             )
                           : "No date"}
                       </p>
-                      <p>Tracking Number: {item.trackingNumber}</p>
+                      <p>Tracking Number: {item.trackingNumber}</p>{" "}
                       <Badge status="success" text="Status: Delivered" />
                     </Card>
                   </List.Item>

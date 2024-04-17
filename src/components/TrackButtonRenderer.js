@@ -12,8 +12,12 @@ const TrackButtonRenderer = ({ userRole }) => {
       }}
     >
       {userRole === "customer" && (
-        <Button className="action-button" type="primary">
-          Track
+        <Button
+          className="action-button"
+          type="primary"
+          style={{ bottom: "2px" }}
+        >
+          Track Package
         </Button>
       )}
     </div>

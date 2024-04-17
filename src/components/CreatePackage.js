@@ -44,8 +44,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
     console.log(address);
     const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-    console.log(apiUrl);
-    console.log(apiKey);
+
     try {
       const response = await axios.get(apiUrl);
       if (
@@ -117,6 +116,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
         shipDate: serverTimestamp(),
         trackingNumber,
         driverAssigned,
+        isFeedack: false,
         assignedDriverId,
         adminId: auth.currentUser.uid,
         location: [
@@ -155,7 +155,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
         }}
       >
         <Form.Item
-          name="recipent-name"
+          name="recipentName"
           label="Recipient's Name"
           rules={[
             { required: true, message: "Please input the recipient's name!" },
@@ -164,7 +164,7 @@ const CreatePackageModal = ({ isOpen, onClose }) => {
           <Input />
         </Form.Item>
         <Form.Item
-          name="recipient-address"
+          name="recipientAddress"
           label="Recipient's Address"
           rules={[
             { required: true, message: "Please input the recipicent address!" },

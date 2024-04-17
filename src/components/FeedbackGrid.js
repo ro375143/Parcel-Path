@@ -48,8 +48,9 @@ const FeedbackButtonRenderer = ({
           type="primary"
           icon={<EditOutlined />}
           onClick={() => onEdit(params.data)}
+          style={{ bottom: "2px" }}
         >
-          REPLY
+          REPLY TO FEEDBACK
         </Button>
       )}
       {(userRole === "customer" || userRole === "driver") && (
@@ -212,7 +213,7 @@ const FeedbackGrid = () => {
       onCancel: () => {
         message.success("Returning to Dashboard");
         // redirect to dashboard
-        return router.push("/admin");
+        return router.push(`/admin/${user.uid}/dashboard`);
       },
     });
   };
@@ -302,7 +303,20 @@ const FeedbackGrid = () => {
       />
       <Modal
         className="modal-theme"
-        title="RESPONDING TO FEEDBACK"
+        title={
+          <div
+            style={{
+              background: "white",
+              padding: "10px 20px",
+              textAlign: "center",
+              borderRadius: "8px",
+            }}
+          >
+            {userRole === "admin"
+              ? "RESPONDING TO FEEDBACK"
+              : "VIEWING FEEDBACK"}
+          </div>
+        }
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
@@ -312,14 +326,18 @@ const FeedbackGrid = () => {
           className="feedback-form"
           onFinish={submitResponse}
         >
-          <Form.Item label="Feedback">
+          <Form.Item
+            label={<span style={{ fontWeight: "bold" }}>Feedback</span>}
+          >
             <textarea
               className="feedback-textarea"
               value={currentFeedback?.description}
               disabled
             />
           </Form.Item>
-          <Form.Item label="Response">
+          <Form.Item
+            label={<span style={{ fontWeight: "bold" }}>Response</span>}
+          >
             {userRole === "admin" ? (
               <textarea
                 className="feedback-textarea"
@@ -332,6 +350,7 @@ const FeedbackGrid = () => {
               </div>
             )}
           </Form.Item>
+
           <Form.Item>
             {userRole === "admin" && (
               <Button
